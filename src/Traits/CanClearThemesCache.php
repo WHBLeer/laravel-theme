@@ -16,7 +16,3 @@ trait CanClearThemesCache
 }
 
 
-mv ./src/Traits/PluginCommandTrait.php ./src/Traits/ThemeCommandTrait.php
-mv ./resources/lang/zh-CN/plugins.php ./resources/lang/zh-CN/themes.php
-mv ./resources/lang/en/plugins.php ./resources/lang/en/themes.php
-
