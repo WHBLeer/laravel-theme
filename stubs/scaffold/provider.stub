@@ -1,0 +1,110 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use Illuminate\Support\ServiceProvider;
+
+class $CLASS$ extends ServiceProvider
+{
+    /**
+     * @var string $themeName
+     */
+    protected string $themeName = '$THEME$';
+
+    /**
+     * @var string $themeNameLower
+     */
+    protected string $themeNameLower = '$LOWER_NAME$';
+
+    /**
+     * Boot the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerTranslations();
+        $this->registerConfig();
+        $this->registerViews();
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->app->register(RouteServiceProvider::class);
+    }
+
+    /**
+     * Register config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([
+            theme_path($this->themeName, '$PATH_CONFIG$/config.php') => config_path($this->themeNameLower . '.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            theme_path($this->themeName, '$PATH_CONFIG$/config.php'), $this->themeNameLower
+        );
+    }
+
+    /**
+     * Register views.
+     *
+     * @return void
+     */
+    public function registerViews()
+    {
+        $viewPath = resource_path('views/themes/' . $this->themeNameLower);
+
+        $sourcePath = theme_path($this->themeName, '$PATH_VIEWS$');
+
+        $this->publishes([
+            $sourcePath => $viewPath
+        ], ['views', $this->themeNameLower . '-theme-views']);
+
+        $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->themeNameLower);
+    }
+
+    /**
+     * Register translations.
+     *
+     * @return void
+     */
+    public function registerTranslations()
+    {
+        $langPath = resource_path('lang/themes/' . $this->themeNameLower);
+
+        if (is_dir($langPath)) {
+            $this->loadTranslationsFrom($langPath, $this->themeNameLower);
+        } else {
+            $this->loadTranslationsFrom(theme_path($this->themeName, '$PATH_LANG$'), $this->themeNameLower);
+        }
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return [];
+    }
+
+    private function getPublishableViewPaths(): array
+    {
+        $paths = [];
+        foreach (config('view.paths') as $path) {
+            if (is_dir($path . '/themes/' . $this->themeNameLower)) {
+                $paths[] = $path . '/themes/' . $this->themeNameLower;
+            }
+        }
+        return $paths;
+    }
+}

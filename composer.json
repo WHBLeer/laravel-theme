@@ -1,0 +1,45 @@
+{
+    "name": "sanlilin/laravel-theme",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "wanghongbin",
+            "email": "wanghongbin816@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Sanlilin\\LaravelTheme\\": "src/"
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Sanlilin\\LaravelTheme\\Tests\\": "tests",
+            "ThemesTest\\": "tests/stubs/valid/"
+        }
+    },
+    "require": {
+        "php": "^7.3|^8.0",
+        "ext-zip": "*",
+        "laravel/framework": "^8.12",
+        "spatie/laravel-enum": "^2.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0",
+        "orchestra/testbench": "^4.0|^5.0|^6.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Sanlilin\\LaravelTheme\\Providers\\ThemeServiceProvider"
+            ]
+        }
+    }
+}
