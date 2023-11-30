@@ -7,6 +7,8 @@ Route::group(['as' => 'seller.', 'prefix' => 'seller', 'middleware' => ['auth','
 	Route::group(['as' =>'theme.','prefix'=>'theme'], function () {
 		Route::get('/list',[LaravelThemeController::class,'list'])->name('list');
 		Route::get('/market',[LaravelThemeController::class,'market'])->name('market');
+		Route::get('/setting',[LaravelThemeController::class,'setting'])->name('setting');
+		Route::post('/config/{theme}',[LaravelThemeController::class,'config'])->name('config');
 		Route::post('/disable',[LaravelThemeController::class,'disable'])->name('disable');
 		Route::post('/enable',[LaravelThemeController::class,'enable'])->name('enable');
 		Route::post('/delete',[LaravelThemeController::class,'delete'])->name('delete');

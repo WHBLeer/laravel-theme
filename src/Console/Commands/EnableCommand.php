@@ -32,42 +32,33 @@ class EnableCommand extends Command
 		/**
 		 * check if user entred an argument.
 		 */
-		if ($this->argument('theme') === null) {
-			$this->enableAll();
-
-			return 0;
-		}
+		$this->disableAll();
 
 		/** @var Theme $theme */
 		$theme = $this->laravel['themes.repository']->findOrFail($this->argument('theme'));
-		if ($theme->isDisabled()) {
-			$theme->enable();
+		$theme->enable();
 
-			$this->info("Theme [{$theme}] enabled successful.");
-		} else {
-			$this->comment("Theme [{$theme}] has already enabled.");
-		}
+		$this->info("Theme [{$theme}] enabled successful.");
 
 		return 0;
 	}
 
 	/**
-	 * enableAll.
+	 * disableAll.
 	 *
 	 * @return void
-	 * @throws Exception
 	 */
-	public function enableAll(): array
+	public function disableAll(): void
 	{
-		/** @var Theme $theme */
 		$themes = $this->laravel['themes.repository']->all();
-
+		/** @var Theme $theme */
 		foreach ($themes as $theme) {
-			if ($theme->isDisabled()) {
-				$theme->enable();
-				$this->info("Theme [{$theme}]  enabled successful.");
+			if ($theme->isEnabled()) {
+				$theme->disable();
+
+				$this->info("Theme [{$theme}] disabled successful.");
 			} else {
-				$this->comment("Theme [{$theme}] has already enabled.");
+				$this->comment("Theme [{$theme}] has already disabled.");
 			}
 		}
 	}

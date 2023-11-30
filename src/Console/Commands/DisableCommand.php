@@ -27,21 +27,16 @@ class DisableCommand extends Command
 	 */
 	public function handle(): int
 	{
-		/**
-		 * check if user entred an argument.
-		 */
-		if ($this->argument('theme') === null) {
-			$this->disableAll();
-			return 0;
-		}
-
 		/** @var Theme $theme */
 		$theme = $this->laravel['themes.repository']->findOrFail($this->argument('theme'));
 
 		if ($theme->isEnabled()) {
 			$theme->disable();
-
 			$this->info("Theme [{$theme}] disabled successful.");
+
+			$default_theme = $this->laravel['themes.repository']->first();
+			$default_theme->enable();
+			$this->info("Theme [{$default_theme}] enabled successful.");
 		} else {
 			$this->comment("Theme [{$theme}] has already disabled.");
 		}
@@ -49,25 +44,6 @@ class DisableCommand extends Command
 		return 0;
 	}
 
-	/**
-	 * disableAll.
-	 *
-	 * @return void
-	 */
-	public function disableAll(): void
-	{
-		$themes = $this->laravel['themes.repository']->all();
-		/** @var Theme $theme */
-		foreach ($themes as $theme) {
-			if ($theme->isEnabled()) {
-				$theme->disable();
-
-				$this->info("Theme [{$theme}] disabled successful.");
-			} else {
-				$this->comment("Theme [{$theme}] has already disabled.");
-			}
-		}
-	}
 
 	/**
 	 * Get the console command arguments.

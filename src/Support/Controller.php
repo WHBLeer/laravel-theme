@@ -3,6 +3,10 @@
 namespace Sanlilin\LaravelTheme\Support;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use Gloudemans\Shoppingcart\Facades\Cart;
+use App\Models\Customer\CustomerProductWishlist;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -14,8 +18,27 @@ class Controller extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+	public $customer = null;
+
 	public function __construct()
 	{
+		View::share(['query_url'=>URL::current()]);
+		$this->middleware(function ($request, $next) {
+			if ($customer = customer()) {
+				$this->customer = $customer;
+				View::share(['customer'=>$this->customer]);
+				$wishlist = CustomerProductWishlist::where([
+					'customer_id' => $customer->id,
+				])->count();
+			} else {
+				$wishlist = Cart::instance('wishlist')->count();
+			}
+			if (!Session::has('cart_key')) {
+				Session::put('cart_key', 'tourist');
+			}
+			View::share(['wishlist_count'=>$wishlist]);
+			return $next($request);
+		});
 	}
 
 	/**

@@ -10,8 +10,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Storage;
+use Sanlilin\LaravelTheme\Support\Json;
 use Illuminate\Console\Command as Console;
 use Sanlilin\LaravelTheme\Support\Theme;
 use Sanlilin\LaravelTheme\Support\Config;
@@ -140,6 +142,43 @@ class LaravelThemeController extends Controller
 	}
 
 	/**
+	 * 主题配置。
+	 *
+	 * @param Request $request
+	 * @return Application|Factory|View|RedirectResponse
+	 * @author: hongbinwang
+	 * @time  : 2023/10/18 15:23
+	 */
+	public function setting(Request $request)
+	{
+		/** @var Theme $theme */
+		$theme = app('themes.repository')->findOrFail($request->theme);
+		if (!file_exists($theme->getPath().'/config.json')) {
+			return back()->with('error', __('The current topic does not have a configuration file'));
+		}
+		$config = json_decode(file_get_contents($theme->getPath().'/config.json'));
+		return view('laravel-theme::setting',compact('theme','config'));
+	}
+
+	/**
+	 * 保存主题配置。
+	 *
+	 * @param Request $request
+	 * @param         $theme
+	 * @return JsonResponse
+	 * @author: hongbinwang
+	 * @time  : 2023/10/18 15:23
+	 */
+	public function config(Request $request,$theme)
+	{
+		/** @var Theme $theme */
+		$theme = app('themes.repository')->findOrFail($theme);
+		$config = $request->config??[];
+		file_put_contents($theme->getPath().'/config.json',json_encode($config,JSON_UNESCAPED_UNICODE));
+		return $this->jsonSuccess("Theme [{$theme}] config updated successful.");
+	}
+
+	/**
 	 * artisan theme:disable
 	 * Disable the specified theme.
 	 * 禁用指定的主题。
@@ -158,7 +197,9 @@ class LaravelThemeController extends Controller
 		if ($theme->isEnabled()) {
 			$theme->disable();
 
-			return $this->jsonSuccess("Theme [{$theme}] disabled successful.");
+			$default_theme = app('themes.repository')->first();
+			$default_theme->enable();
+			return $this->jsonSuccess("Theme [{$theme}] disabled successful. Theme [{$default_theme}] enabled successful.");
 		} else {
 			return $this->jsonSuccess("Theme [{$theme}] has already disabled.");
 		}
@@ -177,16 +218,18 @@ class LaravelThemeController extends Controller
 	 */
 	public function enable(Request $request)
 	{
+		$themes = app('themes.repository')->all();
+		/** @var Theme $theme */
+		foreach ($themes as $theme) {
+			if ($theme->isEnabled()) {
+				$theme->disable();
+			}
+		}
+
 		/** @var Theme $theme */
 		$theme = app('themes.repository')->findOrFail($request->theme);
-
-		if ($theme->isDisabled()) {
-			$theme->enable();
-
-			return $this->jsonSuccess("Theme [{$theme}] enabled successful.");
-		} else {
-			return $this->jsonSuccess("Theme [{$theme}] has already enabled.");
-		}
+		$theme->enable();
+		return $this->jsonSuccess("Theme [{$theme}] enabled successful.");
 	}
 
 	/**

@@ -9,8 +9,8 @@ if (! function_exists('theme_path')) {
     }
 }
 
-if (! function_exists('theme_native')) {
-	function theme_native(string $name): bool
+if (! function_exists('theme_view')) {
+	function theme_view(string $name): bool
 	{
 		$theme = app('themes.repository')->find($name);
 
@@ -18,8 +18,8 @@ if (! function_exists('theme_native')) {
 	}
 }
 
-if (! function_exists('theme_enabled')) {
-	function theme_enabled(string $name): string
+if (! function_exists('theme_asset')) {
+	function theme_asset(string $name): string
 	{
 		$theme = app('themes.repository')->find($name);
 

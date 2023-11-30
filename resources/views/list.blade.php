@@ -77,6 +77,7 @@
                                     <td class="text-right">
                                         @if($row['status'] == 'Enabled')
                                             <a href="javascript:void(0);" class="btn btn-sm btn-theme btn-warning disable-theme" data-name="{{$row['name']}}">{{ __('Disable') }}</a>
+											<a href="{{route('seller.theme.config',['theme'=>$row['name']])}}" class="btn btn-sm btn-info config-theme">{{ __('Setting') }}</a>
                                         @else
                                             <a href="javascript:void(0);" class="btn btn-sm btn-theme btn-success enable-theme" data-name="{{$row['name']}}">{{ __('Enable') }}</a>
                                         @endif
