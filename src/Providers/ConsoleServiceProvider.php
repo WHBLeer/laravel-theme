@@ -22,6 +22,7 @@ use Sanlilin\LaravelTheme\Console\Commands\ThemeDeleteCommand;
 use Sanlilin\LaravelTheme\Console\Commands\ThemeMakeCommand;
 use Sanlilin\LaravelTheme\Console\Commands\ProviderMakeCommand;
 use Sanlilin\LaravelTheme\Console\Commands\PublishCommand;
+use Sanlilin\LaravelTheme\Console\Commands\ReloadCommand;
 use Sanlilin\LaravelTheme\Console\Commands\RegisterCommand;
 use Sanlilin\LaravelTheme\Console\Commands\RouteProviderMakeCommand;
 use Sanlilin\LaravelTheme\Console\Commands\SeedMakeCommand;
@@ -60,7 +61,8 @@ class ConsoleServiceProvider extends ServiceProvider
         ThemeDeleteCommand::class,
         InstallCommand::class,
         PublishCommand::class,
-        RegisterCommand::class,
+	    ReloadCommand::class,
+	    RegisterCommand::class,
         LoginCommand::class,
         UploadCommand::class,
         DownLoadCommand::class,

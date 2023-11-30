@@ -1,0 +1,260 @@
+@php
+	$local = \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getCurrentLocale();
+	$breadcrumbs = [];
+	if($page['info_type']=='category' || $page['info_type']=='brand') {
+		$breadcrumbs[] = ['url'=>url('/'.$page['info_type'].'/'.$page['info']['slug'].'/'.$page['info']['id']),'title'=>__(ucfirst($page['info_type']))];
+	}
+	$breadcrumbs[] = ['url'=>null,'title'=>$page['info']['title'] ?? __('Products')];
+@endphp
+@extends(front_view('layouts.app'),['header'=>$page['info']['title'] ?? __('Product List'),'breadcrumbs'=>$breadcrumbs])
+@push('css')
+	<link rel="stylesheet" href="{{ front_asset('css/jquery-ui.css')}}">
+@endpush
+@section('content')
+	<!--=====================================
+			 PRODUCT LIST PART START
+	=======================================-->
+	<section class="product-list">
+		<div class="container">
+			<div class="row">
+				@if ($page['info_type']=='all')
+					<div class="col-lg-2" id="left_sidebar">
+						<div class="product-list-bar cat">
+							<div class="product-list-bar">
+								<h4 class="mb-3">{{ __('Filter by Category') }}</h4>
+								<ul class="product-size category_area">
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									@foreach ($page['categories'] as $item)
+										<li class="dynamic-elements">
+											<label class="attrs" for="category-{{ $item['id'] }}">
+												<h5>
+													<input type="checkbox" class="filter-attr categories"
+														   @if($page['info']['id']==$item['id'] || (isset($filter['category']) && in_array($item['id'],explode(',',$filter['category'])))) checked
+														   @endif value="{{ $item['id'] }}"
+														   id="category-{{ $item['id'] }}">{{ Str::limit($item['i18ns'][$local]['name'],22,'...') }}
+												</h5>
+												{{--											 <p>({{ $item['cate_posts_count'] }})</p>--}}
+											</label>
+										</li>
+									@endforeach
+								</ul>
+							</div>
+						</div>
+						<div class="product-list-bar bran">
+							<div class="product-list-bar">
+								<h4 class="mb-3">{{ __('Filter by Brand') }}</h4>
+								<ul class="product-size brand_area">
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									<li class="cat-item"><p><span class="content-placeholder h-20">&nbsp;</span></p>
+									</li>
+									@foreach ($page['brands'] as $item)
+										<li class="dynamic-elements">
+											<label class="attrs" for="brand-{{ $item['id'] }}">
+												<h5>
+													<input type="checkbox" class="filter-attr brands"
+														   @if($page['info']['id']==$item['id'] ||  (isset($filter['brand']) && in_array($item['id'],explode(',',$filter['brand'])))) checked
+														   @endif value="{{ $item['id'] }}"
+														   id="brand-{{ $item['id'] }}">{{ Str::limit($item['i18ns'][$local]['name'],22,'...') }}
+												</h5>
+												{{--											<p>({{ $item['brand_posts_count'] }})</p>--}}
+											</label>
+										</li>
+									@endforeach
+								</ul>
+							</div>
+						</div>
+						@foreach ($page['attributes'] as $index => $attr)
+							<div class="product-list-bar dynamic-elements">
+								<h4 class="mb-3">{{__('Select by ').Str::limit($attr['i18ns'][$local]['name'],22,'...')}}</h4>
+								<ul class="product-size product-size-ul{{$index}}">
+									@foreach ($attr['variations'] as $item)
+										<li>
+											<label class="attrs" for="attribute-{{ $item['id'] }}">
+												<h5>
+													<input type="checkbox" class="filter-attr attributes"
+														   @if($page['info']['id']==$item['id'] ||  (isset($filter['variant']) && in_array($item['id'],explode(',',$filter['variant'])))) checked
+														   @endif value="{{ $item['id'] }}"
+														   id="attribute-{{ $item['id'] }}">{{ Str::limit($item['name'],22,'...') }}
+												</h5>
+												{{--										 <p>({{ $item['product_count'] }})</p>--}}
+											</label>
+										</li>
+									@endforeach
+								</ul>
+							</div>
+						@endforeach
+					</div>
+				@endif
+				<div @if ($page['info_type']=='all')class="col-lg-10" @else class="col-lg-12"@endif>
+					<div class="product-filter">
+						<div class="product-page-number">
+							<p>{{ __('Showing') }}
+								<span id="from">{{ $products->firstItem() }}</span>–
+								<span id="to">{{ $products->lastItem() }}</span> of
+								<span id="total">{{$products->total()}}</span> {{ __('results') }}
+							</p>
+						</div>
+						
+						<select class="custom-select order_by" id="order_by" name="order">
+							<option value="desc"
+									@if($filter['ob']=='desc') selected @endif>{{ __('Sort by new item') }}</option>
+							<option value="asc"
+									@if($filter['ob']=='asc') selected @endif>{{ __('Sort by old item') }}</option>
+							<option value="best_sell"
+									@if($filter['ob']=='best_sell') selected @endif>{{ __('Sort by best selling') }}</option>
+						</select>
+					</div>
+					<div class="preload_area">
+						@for($j=0; $j < 18 ; $j++)
+							<div class="product-card content-placeholder">
+								<div class="product-img">
+									<a href="#" class="text-dark">
+										<div class="content-placeholder product_preload"></div>
+									</a>
+								</div>
+								<div class="product-content">
+									<div class="product-name">
+										<h3></h3>
+										<p></p>
+									</div>
+									<div class="product-price">
+										<h4></h4>
+										<p></p>
+									</div>
+									<div class="product-cart"></div>
+								</div>
+							</div>
+						@endfor
+					</div>
+					<div class="product-parent">
+						@foreach ($products as $item)
+							@php
+								if (count($item['categories']) > 0) {
+									$category_arr = [];
+									foreach ($item['categories'] as $cate) {
+										$category_arr[] = $cate['name'];
+									}
+									$category = implode('|',$category_arr);
+								} else{
+									$category = '';
+								}
+							@endphp
+							
+							<div class="product-card dynamic-elements">
+								<div class="product-img">
+									@if($item['preview_type']=='video')
+										<video src="{{ $item['preview'] }}" controlslist="nofullscreen" muted
+											   loop="loop"></video>
+									@else
+										<img src="{{ $item['preview'] }}" alt="">
+									@endif
+									
+									@if($item['stock_status'] == 0)
+										<span class="new-badge">Stock Out</span>
+									@else
+										@if($item['featured'] == 1)
+											<span class="new-badge">Trending</span>
+										@elseif($item['featured'] == 2)
+											<span class="new-badge">Best selling</span>
+										@endif
+									@endif
+									<ul class="product-widget">
+										<li>
+											@if($item['can_add'])
+												<a href="javascript:void(0)" onclick="cart_add({{ $item['id'] }})"
+												   class="cart_{{ $item['id'] }}">
+													<i class="fas fa-shopping-basket"></i>
+												</a>
+											@else
+												<a href="{{ $item['detail_url'] }}"><i
+															class="fas fa-shopping-basket"></i></a>
+											@endif
+										</li>
+										<li><a href="{{ $item['detail_url'] }}"><i class="fas fa-search"></i></a></li>
+										<li><a class="wishlist_{{ $item['id'] }}"
+											   onclick="wishlist_add({{ $item['id'] }})"><i
+														class="fas fa-heart"></i></a></li>
+									</ul>
+								</div>
+								<div class="product-content">
+									<div class="product-cate">
+										<p>{{ $category }}</p>
+									</div>
+								</div>
+								<div class="product-name">
+									<a href="{{ $item['detail_url'] }}">
+										<h3>{{Str::limit($item['i18ns'][$local]['title'],120,'...')}}</h3></a>
+								</div>
+								<div class="product-price">
+									<p>
+										@if ($item['type']=='with')
+											@if (in_array($item['price']['derate_type'],[1,2]))
+												<del>{{ amount_format_fe($item['price']['regular_price']) }}</del>
+												{{ amount_format_fe($item['price']['price']) }}
+											@else
+												{{ amount_format_fe($item['price']['regular_price']) }}
+											@endif
+										@else
+											{{ amount_format_fe($item['price']['regular_price']) }}
+										@endif
+									</p>
+									<ul class="product-rating">
+										<li><i class="fas fa-star"></i><span>({{ $item['reviews_count'] }})</span></li>
+									</ul>
+								</div>
+							</div>
+						@endforeach
+					</div>
+					{{ $products->appends(Request::all())->links(front_view('components.pagination')) }}
+				</div>
+			</div>
+		</div>
+	</section>
+	<!--=====================================
+			 PRODUCT LIST PART END
+	=======================================-->
+	@plugin('CMS')
+	<!--=====================================
+				SHOW PART START
+	=======================================-->
+	{{ shows_card('in_list') }}
+	<!--=====================================
+				  SHOW PART END
+	=======================================-->
+	@endplugin
+@endsection
+@push('js')
+	<script src="{{ front_asset('js/jquery-ui.js')}}"></script>
+	<script src="{{ front_asset('js/shop.js')}}"></script>
+	<!-- hover视频播放 -->
+	<script src="{{ front_asset('js/video.js')}}"></script>
+@endpush
+
+
+
+
+

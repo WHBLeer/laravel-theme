@@ -1,0 +1,58 @@
+$(document).ready(function () {
+    // 放大镜
+    $(".jqzoom").imagezoom();
+    //克隆 video
+    const loce = $('#videos').clone(true);
+    $('#videos').detach()
+    const img = $('figure:nth-of-type(2)').children('.img-dv').children('a').attr('href')
+    $('.one_a').attr('href',img).attr('data-med',img)
+    $('.one_a').children('img').attr('src',img).attr('rel',img)
+    // if($('.small_picture').children('video').length){
+        $('.small_picture').children('video').remove()
+        // console.log($('.small_picture').next().children('img'))
+        const small_picture = $('.small_picture').next().children('img').attr('src')
+        $('.small_picture').children('img').attr('src',small_picture)
+    // }
+    //视频
+    const play = $('.play');
+    play.on('click', function (event) {
+        event.stopPropagation();
+        $('#bagimg').hide();
+        $('.first-dv').append(loce);
+        $('#videos').attr('class', 'videos');
+        $('#videos').get(0).play();
+        $('#videos').attr('controls', 'controls');
+        //暂停按钮隐藏
+        $(this).hide();
+    });
+    //点击视频容器视频暂停
+    $('#videos').click(function () {
+        $('#videos').removeAttr('controls')
+        $('#videos').get(0).pause();
+        //暂停按钮显示
+        play.show();
+    });
+    // 显示放大镜图标
+    $('.single-product-sliderl img').on('mouseover', function () {
+        $(this).siblings('.amplify').show()
+    });
+    // 监听视频
+    const target = $('.first-dv').parent()[0];
+    // 创建一个 MutationObserver 实例
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+                // 当 style 属性变化时执行的代码
+                const opacity = target.style.opacity;
+                if ($('.first-dv video').length) {
+                    opacity == '1' ? $('#videos').addClass('videos') : $('#videos').removeClass('videos');
+                    opacity == '1' ? $('#videos').removeClass('smvideo') : $('#videos').addClass('smvideo')
+                }
+            }
+        });
+    });
+    // 配置 MutationObserver 监听的属性和选项
+    const config = { attributes: true, attributeFilter: ['style'] };
+    // 将目标节点和配置传递给观察器实例
+    observer.observe(target, config);
+});

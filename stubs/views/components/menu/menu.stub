@@ -1,0 +1,9 @@
+@php
+	$local = \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getCurrentLocale();
+@endphp
+
+<ul class="cate-scroll">
+	@foreach($items as $item)
+		<li><a href="{{$item['detail_url']}}">{{$item['i18ns'][$local]['name']}}</a></li>
+	@endforeach
+</ul>

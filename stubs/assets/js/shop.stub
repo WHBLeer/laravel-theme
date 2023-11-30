@@ -1,0 +1,20 @@
+(function ($) {
+    "use strict";
+    $('.cat-item').remove();
+    $('.content-placeholder').remove();
+    $('.dynamic-elements').show();
+    
+    
+    $(document).on('change','#order_by',()=> {
+        shop_filter_params();
+    });
+    
+    $(document).on('click','.filter-attr',()=> {
+        shop_filter_params();
+    });
+    
+    $(document).on('click','.filter_btn',()=> {
+        shop_filter_params();
+    });
+    
+})(jQuery);

@@ -1,0 +1,13 @@
+@extends(front_view('layouts.app'),['header'=>$info->title,'breadcrumbs'=>[['url'=>null,'title'=>$info->title]]])
+@section('content')
+<section class="product-list">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				{{ content($info->content ?? '') }}
+			</div>
+		</div>
+	</div>
+</section>
+
+@endsection

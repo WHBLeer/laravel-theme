@@ -1,0 +1,92 @@
+(function ($) {
+	"use strict";
+
+	// 为导航条固定时滚动
+	$(window).on("scroll", function(){
+		const scrolling = $(this).scrollTop();
+		if (scrolling > 300){
+			$(".navbar-part").addClass("navbar-fixed");
+            $('#back-to-top').fadeIn();
+		}else{
+			$(".navbar-part").removeClass("navbar-fixed");
+            $('#back-to-top').fadeOut();
+		}
+	});
+
+    // 对于滚动效果
+	$(".cate-scroll").niceScroll({
+		cursorcolor: $('#theme_color').val(),
+		cursorborder: "none",
+	});
+
+    // 页面滚动
+    const scrolling = ()=>{
+        $('body').css({
+        　　"overflow-x":"auto",
+        　　"overflow-y":"auto"
+        });
+    }
+
+    // 页面禁止滚动
+    const noscrolling = ()=>{
+        $('body').css({
+        　　"overflow-x":"hidden",
+        　　"overflow-y":"hidden"
+        });
+    }
+
+    // 按下按钮时平滑滚动回到顶部
+    $("#back-to-top").on("click", function(){
+        $('html, body').animate({ scrollTop: 0 }, 'fast');
+        return false;
+    });
+
+	// 为右侧侧边栏显示和隐藏
+	$(".cart-icon").on("click", function(){
+	    // 页面禁止滚动
+	    noscrolling();
+		$(".right-sidebar").addClass("active");
+		$(".right-cross").on('click', function(){
+			$(".right-sidebar").removeClass("active");
+			// 页面滚动
+			scrolling();
+		});
+	});
+
+
+	// 用于左侧侧边栏显示和隐藏
+	$(".left-bar, .left-src").on("click", function(){
+	    // 页面禁止滚动
+	    noscrolling();
+		$(".left-sidebar").addClass("active");
+		$(".left-cross").on('click', function(){
+			$(".left-sidebar").removeClass("active");
+			// 页面滚动
+			scrolling();
+		});
+	});
+
+
+	// 导航栏活动菜单
+	$(".banner-cate").on("click", function(){
+		$(".banner-cate").toggleClass("active");
+	});
+
+
+	// 用于网格系统产品卡
+	$('.grid-hori').on('click', function(){
+		$('.product-card').addClass('product-list-card');
+		$('.grid-hori').addClass('active');
+		$('.grid-verti').removeClass('active');
+		$('.grid-verti').on('click', function(){
+			$('.product-card').removeClass('product-list-card');
+			$('.grid-verti').addClass('active');
+			$('.grid-hori').removeClass('active');
+		});
+	});
+
+    $("#captcha").on("click", function(){
+        const captcha_src = $('#captcha_src').val()
+        $(this).prop('src',captcha_src+Date.now());
+    });
+})(jQuery);

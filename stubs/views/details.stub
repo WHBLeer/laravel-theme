@@ -1,0 +1,683 @@
+@extends(front_view('layouts.app'),['header'=>$info['title'],'breadcrumbs'=>[['url'=>url('/shop'),'title'=>__('Product')],['url'=>null,'title'=>$info['title']]]])
+@push('css')
+    <link rel="stylesheet" href="{{ front_asset('css/shopNotice.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/pop.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/photoswipe.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/default-skin.min.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/customstyle.css') }}">
+    
+    <script>
+        @if(options('template_type','B2C')=='B2C')
+        let show_review = true;
+        @else
+        let show_review = false;
+        @endif
+        {!! $info['detail_obj'] !!}
+    </script>
+@endpush
+@section('content')
+    <section class="single-product">
+        <div class="container">
+            <div class="row">
+                <div class="swpbox my-gallery col-md-6 col-lg-6">
+                    <div class="single-product-sliderl">
+                        @if ($info['preview'])
+                            <figure>
+                                @if(in_array('video',$info['preview']['groups']))
+                                    <div class="img-dv first-dv">
+                                        <a class="one_a" href="" data-size="1600x1600" data-med=""
+                                           data-med-size="1024x1024">
+                                            <img id="bagimg" src="{{ front_asset('img/loading.png') }}" rel=""
+                                                 alt="{{ $info['preview']['org_name'] }}">
+                                            <video id="videos" src="{{ _F($info['preview']['path']) }}" width="100%"
+                                                   height="100%" class="">
+                                                <source src="{{ _F($info['preview']['path']) }}" type="video/mp4">
+                                            </video>
+                                        </a>
+                                        <div class="play"></div>
+                                    </div>
+                                    <figcaption style="display:none;">{{ content($info['excerpt'] ?? '') }}</figcaption>
+                                @else
+                                    <div class="img-dv first-dv">
+                                        <a class="" href="{{ _F($info['preview']['path']) }}" data-size="1600x1600"
+                                           data-med="{{ _F($info['preview']['path']) }}"
+                                           data-med-size="1024x1024">
+                                            <img src="{{ _F($info['preview']['path']) }}"
+                                                 rel="{{ _F($info['preview']['path']) }}" class="jqzoom"
+                                                 alt="{{ $info['preview']['org_name'] }}">
+                                            <div class="amplify"></div>
+                                        </a>
+                                    </div>
+                                    <figcaption style="display:none;">{{ content($info['excerpt'] ?? '') }}</figcaption>
+                                @endif
+                            </figure>
+                        @endif
+                        @foreach ($info['medias'] as $row)
+                            <figure>
+                                <div class="img-dv">
+                                    <a class="" href="{{ _F($row['path']) }}" data-size="1600x1600"
+                                       data-med="{{ _F($row['path']) }}"
+                                       data-med-size="1024x1024">
+                                        <img src="{{ _F($row['path'],'lg') }}" rel="{{ _F($row['path']) }}"
+                                             class="jqzoom"
+                                             alt="{{ $row['org_name'] }}">
+                                        <div class="amplify"></div>
+                                    </a>
+                                </div>
+                                <figcaption style="display:none;">{{ content($info['excerpt'] ?? '') }}</figcaption>
+                            </figure>
+                        @endforeach
+                    </div>
+                    @if ($info['preview'] || count($info['medias']) > 1)
+                        <div class="single-thumb-sliderl" style="margin: 30px 0;">
+                            @if ($info['preview'])
+                                <div class="m-lr small_picture">
+                                    @if(in_array('video',$info['preview']['groups']))
+                                        <video src="" width="100%" height="100%" controlslist="nofullscreen"></video>
+                                        <img class="imgvideo" src="" alt="">
+                                        <div class="small_play"></div>
+                                    @else
+                                        <img src="{{ _F($info['preview']['path']) }}"
+                                             alt="{{ $info['preview']['org_name'] }}">
+                                    @endif
+                                </div>
+                            @endif
+                            @foreach ($info['medias'] as $index => $row)
+                                <div class="m-lr index-{{$index}}">
+                                    <img src="{{ _F($row['path']) }}" alt="{{ $row['org_name'] }}" class="thumb-img">
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                <div class="col-md-6 col-lg-6">
+                    <div class="single-product-info">
+                        <div class="single-product-meta">
+                            <div class="single-product-name">
+                                <h1 class="producth1title">{{ $info['title'] }}</h1>
+                                <p>{{ __('SKU') }}: <span id="sku_area">{{ $info['stock']['sku'] }}</span></p>
+                            </div>
+                            <ul class="single-page-slider round-icon">
+                                @if ($prev)
+                                    <li><a href="{{ url('/product/' . $prev->slug . '/' . $prev->id) }}"><i
+                                                    class="fas fa-long-arrow-alt-left"></i></a></li>
+                                @endif
+                                @if ($next)
+                                    <li><a href="{{ url('/product/' . $next->slug . '/' . $next->id) }}"><i
+                                                    class="fas fa-long-arrow-alt-right"></i></a></li>
+                                @endif
+                            </ul>
+                        </div>
+                        <div class="single-product-meta">
+                            <ul class="single-product-review">
+                                @foreach ($defaultData['ratting_avg'] as $item)
+                                    <li><i class="fas fa-star"></i></li>
+                                @endforeach
+                                <li><span>({{count($defaultData['ratting_avg'])}}/5)</span></li>
+                            </ul>
+                            <div class="single-product-price">
+                                <p>
+                                    @if (in_array($info['default_stock']['derate_type'],[1,2]))
+                                        <span id="amount">{{ amount_format_fe($info['default_stock']['special_price']) }}</span>
+                                        <del id="regular_amount">{{ amount_format_fe($info['default_stock']['price']) }}</del>
+                                    @else
+                                        <span id="amount">{{ amount_format_fe($info['default_stock']['price']) }}</span>
+                                        <del id="regular_amount" style="display: none"></del>
+                                    @endif
+                                </p>
+                            </div>
+                            <input type="hidden" id="main_amount"
+                                   value="{{ amount_format_fe($info['default_stock']['price']) }}">
+                        </div>
+                        <p>
+                        <span id="count_down"
+                              @if (!in_array($info['default_stock']['derate_type'],[1,2])) style="display: none"@endif>{{__('Discount Surplus')}}：<b>{{count_down($info['default_stock']['ending_date'])}}</b></span>
+                        </p>
+                        <p class="single-product-describe">
+                            {{ content($info['excerpt'] ?? '') }}
+                        </p>
+                        <form method="post" class="cart-form" id="cart-form" action="{{ url('/cart/add') }}">
+                            @csrf
+                            <input type="hidden" name="id" value="{{ $info['id'] }}">
+                            <input type="hidden" name="sku" id="cart_add_sku" value="{{ $info['stock']['sku'] }}">
+                            
+                            {{-- 捆绑商品 --}}
+                            @if (count($info['bind_combination'])>0)
+                                <div class="single-product-widget product-quantity">
+                                    <h6>{{ __('Bind Products') }} :</h6>
+                                    @foreach ($info['bind_combination'] as $single)
+                                        <div class="d-flex flex-row bd-highlight mb-3">
+                                            <div class="p-2 bd-highlight">
+                                                @if($single['album_type']=='video')
+                                                    <video src="{{ $single['album'] }}" class="img-thumbnail"
+                                                           style="max-height: 40px;max-width:40px"
+                                                           data-id="{{ $single['id'] }}"></video>
+                                                @else
+                                                    <img src="{{ $single['album'] }}" class="img-thumbnail"
+                                                         style="max-height: 40px;max-width:40px"
+                                                         data-id="{{ $single['id'] }}" title="{{ $single['title'] }}"
+                                                         alt="{{ $single['title'] }}">
+                                                @endif
+                                                <input type="checkbox" id="{{ $single['id'] }}"
+                                                       value="{{ $single['id'] }}"
+                                                       name="bind_ids[]"
+                                                       class="mx-auto form-control bind-combination-check"
+                                                       style="width: 16px">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            
+                            {{-- 组合商品 --}}
+                            @if (count($info['free_combination'])>0)
+                                <div class="single-product-widget product-quantity">
+                                    <h6>{{ __('Free combination') }} :</h6>
+                                    @foreach ($info['free_combination'] as $bck => $single)
+                                        <div class="d-flex flex-row bd-highlight mb-3">
+                                            <div class="p-2 bd-highlight">
+                                                @if($single['album_type']=='video')
+                                                    <video src="{{ $single['album'] }}" class="img-thumbnail"
+                                                           style="max-height: 40px;max-width:40px"
+                                                           data-id="{{ $single['id'] }}"></video>
+                                                @else
+                                                    <img src="{{ $single['album'] }}" class="img-thumbnail"
+                                                         style="max-height: 40px;max-width:40px"
+                                                         data-id="{{ $single['id'] }}" title="{{ $single['title'] }}"
+                                                         alt="{{ $single['title'] }}">
+                                                @endif
+                                                <input type="checkbox" id="{{ $single['id'] }}"
+                                                       value="{{ $single['id'] }}"
+                                                       name="free_ids[]"
+                                                       class="mx-auto form-control free-combination-check"
+                                                       style="width: 16px">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="single-product-widget product-quantity">
+                                @if (empty($info['affiliate']))
+                                    <h5>{{ __('Product Quantity') }} :</h5>
+                                @endif
+                                <ul>
+                                    @if(options('template_type','B2C')=='B2C')
+                                        @if (empty($info['affiliate']))
+                                            <li>
+                                                <input type="number" name="qty" id="qty" value="{{$arguments['Q']??1}}"
+                                                       @if ($info['stock']['stock_status'] == 0)
+                                                           disabled max="0" min="0"
+                                                       @else
+                                                           max="{{ $info['stock']['stock_qty'] }}" min="1"
+                                                        @endif>
+                                            </li>
+                                        @endif
+                                        <li>
+                                            @if (empty($info['affiliate']))
+                                                <button type="submit" class="btn btn-outline submit_btn"
+                                                        @if ($info['stock']['stock_status'] == 0) disabled @endif>
+                                                    <i class="fas fa-shopping-basket"></i>
+                                                    <span class="submit_text">
+												@if ($info['stock']['stock_status'] == 0)
+                                                            {{ __('Out Of Stock') }}
+                                                        @else
+                                                            {{ __('Add to Cart') }}
+                                                        @endif
+											</span>
+                                                </button>
+                                            @else
+                                                <a href="{{ url($info['affiliate']['value'] ?? '') }}" target="_blank"
+                                                   class="btn btn-outline"
+                                                   @if ($info['stock']['stock_status'] == 0) disabled @endif>
+                                                    <i class="fas fa-shopping-basket"></i>
+                                                    <span class="submit_text">
+												@if ($info['stock']['stock_status'] == 0)
+                                                            {{ __('Out Of Stock') }}
+                                                        @else
+                                                            {{ __('Purchase Now') }}
+                                                        @endif
+											</span>
+                                                </a>
+                                            @endif
+                                        </li>
+                                    @endif
+                                    <li>
+                                        <button type="button" class="btn btn-inline enquiriesClick">
+                                            <i class="fas fa-question-circle"></i>
+                                            <span class="submit_text">{{__('Inquiry Now')}}</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0)" data-id="{{ $info['id'] }}"
+                                           class="wishlist-icon wishlist_{{ $info['id'] }} @if(is_wishlist($info['id'])) active @endif"
+                                           id="wishlist">
+                                            <i class="fas fa-heart heart"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <span class="available_qty @if ($info['stock']['stock_status'] == 0) none @endif">{{ __('Stock') }}:
+							<span id="qty_area">
+								@if ($info['stock']['stock_status'] == 1)
+                                    {{ $info['stock']['stock_qty'] }}
+                                @endif
+							</span>
+						</span>
+                                <p class="text-danger none required_option">{{ __('Please select attribute blow') }}</p>
+                            </div>
+                            <input type="hidden" id="attr_count" value="{{$info['attr_count']}}">
+                            @if (count($info['variants']) > 0)
+                                @foreach ($info['variants'] as $key => $item)
+                                    <div class="single-product-widget product-tags">
+                                        <h5>{{ $item['name'] }} <span class="text-danger">*</span>:</h5>
+                                        <ul>
+                                            @foreach ($item['variants'] as $row)
+                                                <li>
+                                                    <label class="cart-form-item selectgroup-item attribute att-{{ $row['id'] }} @if(in_array($row['id'],$arguments['V'])) active @endif">{{ $row['name'] }}
+                                                        <input type="radio" hidden
+                                                               class="att-variation attr req"
+                                                               value="{{ $row['id'] }}"
+                                                               name="attribute[{{ $key }}]"
+                                                               @if(in_array($row['id'],$arguments['V'])) checked @endif>
+                                                    </label>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            @endif
+                            
+                            @if (count($info['values_added']) > 0)
+                                <hr>
+                                @foreach ($info['values_added'] as $key => $item)
+                                    <div class="single-product-widget product-tags">
+                                        <h5>
+                                            {{ $item['name'] }}
+                                            @if ($item['is_required'] == 1)
+                                                <span class="text-danger">*</span>
+                                            @endif:
+                                        </h5>
+                                        <ul>
+                                            @foreach ($item['variation'] as $row)
+                                                <li>
+                                                    <label class="cart-form-item selectgroup-item appreciation app-{{ $row['id'] }} @if(in_array($row['id'],$arguments['O'])) active @endif">
+                                                        @if ($item['select_type'] == 1)
+                                                            <input hidden data-amount="{{ $row['amount'] }}"
+                                                                   data-amount_type="{{ $row['amount_type'] }}"
+                                                                   type="checkbox" name="appreciation[]"
+                                                                   value="{{ $row['id'] }}"
+                                                                   class="selectgroup-input app-variation attr @if($item['is_required'] == 1) req @endif"
+                                                                   @if(in_array($row['id'],$arguments['O'])) checked @endif>
+                                                        @else
+                                                            <input hidden data-amount="{{ $row['amount'] }}"
+                                                                   data-amount_type="{{ $row['amount_type'] }}"
+                                                                   type="radio"
+                                                                   name="appreciation[{{ $key }}]"
+                                                                   value="{{ $row['id'] }}"
+                                                                   class="selectgroup-input app-variation attr @if($item['is_required'] == 1) req @endif"
+                                                                   @if(in_array($row['id'],$arguments['O'])) checked @endif>
+                                                        @endif
+                                                        <span class="selectgroup-button">{{ $row['name'] }}</span>
+                                                    </label>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </form>
+                        <hr>
+                        @if (count($info['categories']) > 0)
+                            <div class="single-product-widget product-tags">
+                                <h5>{{ __('Category') }} :</h5>
+                                <ul>
+                                    @foreach ($info['categories'] as $row)
+                                        <li><a target="_new" href="{{ $row['detail_url'] }}">{{ $row['name'] }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        @if (count($info['brands']) > 0)
+                            <div class="single-product-widget product-tags">
+                                <h5>{{ __('Brand') }} :</h5>
+                                <ul>
+                                    @foreach ($info['brands'] as $row)
+                                        <li><a target="_new" href="{{ $row['detail_url'] }}">{{ $row['name'] }}</a></li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        <div class="single-product-widget product-share">
+                            <h5>{{ __('Share this product') }}</h5>
+                            <ul class="round-icon footer-icon">
+                                <li><a target="_blank"
+                                       href="https://www.facebook.com/sharer/sharer.php?u={{ url()->full() }}"><i
+                                                class="fab fa-facebook-f"></i></a></li>
+                                <li><a target="_blank"
+                                       href="https://twitter.com/intent/tweet?url={{ url()->full() }}"><i
+                                                class="fab fa-twitter"></i></a></li>
+                                <li><a target="_blank"
+                                       href="https://www.linkedin.com/sharing/share-offsite/?url={{ url()->full() }}"><i
+                                                class="fab fa-linkedin-in"></i></a></li>
+                                <li><a target="_blank"
+                                       href="http://pinterest.com/pin/create/link/?url={{ url()->full() }}"><i
+                                                class="fab fa-pinterest-p"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="details-part">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="details-menu">
+                        <ul class="nav nav-tabs">
+                            <li><a href="#descrip" class="nav-link active" data-toggle="tab">{{ __('Description') }}</a>
+                            </li>
+                            @if(options('template_type','B2C')=='B2C')
+                                <li><a href="#review" class="nav-link" data-toggle="tab">{{ __('Review') }} <span
+                                                id="review_count">{{$defaultData['ratting_count']}}</span></a></li>
+                            @endif
+                            @if(count($info['qa']) > 0)
+                                <li><a href="#q_a_session" class="nav-link" data-toggle="tab">{{ __('Q&A') }}</a></li>
+                            @endif
+                            @if(count($info['guideline']) > 0)
+                                <li><a href="#guidelines" class="nav-link" data-toggle="tab">{{ __('Guidelines') }}</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                    <div class="tab-pane active" id="descrip">
+                        <div class="details-descrip">
+                            {{ content($info['content'] ?? '') }}
+                        </div>
+                    </div>
+                    @if(options('template_type','B2C')=='B2C')
+                        <div class="tab-pane" id="review">
+                            <div class="details-review">
+                                <ul class="review-list">
+                                
+                                </ul>
+                                <ul class="pagination pagi-ghape">
+                                
+                                </ul>
+                                <form class="review-form" method="post" action="{{ url('/make-review', $info['id']) }}">
+                                    @csrf
+                                    <h3>{{ __('Leave Your Review') }}</h3>
+                                    <div class="grid-input">
+                                        <input type="text" value="{{ customer()->name ?? '' }}"
+                                               name="name" placeholder="Your name" required readonly>
+                                        <input type="email" name="email" placeholder="Your email" required readonly
+                                               value="{{ customer()->email ?? '' }}">
+                                    </div>
+                                    <div class="row-input">
+                                        <textarea placeholder="Your quote" name="comment" maxlength="200"></textarea>
+                                    </div>
+                                    <div class="star-rating">
+                                        <input type="checkbox" value="5" name="rating" id="star1"><label
+                                                for="star1"></label>
+                                        <input type="checkbox" value="4" name="rating" id="star2"><label
+                                                for="star2"></label>
+                                        <input type="checkbox" value="3" name="rating" id="star3"><label
+                                                for="star3"></label>
+                                        <input type="checkbox" value="2" name="rating" id="star4"><label
+                                                for="star4"></label>
+                                        <input type="checkbox" value="1" name="rating" id="star5"><label
+                                                for="star5"></label>
+                                    </div>
+                                    @if (customer_check())
+                                        <button type="submit" class="btn btn-outline review_btn">
+                                            <i class="fas fa-paper-plane"></i>
+                                            {{ __('Send Review') }}
+                                        </button>
+                                    @else
+                                        @plugin('UCenter')
+                                        <a href="{{u_login()}}" class="btn btn-outline review_btn">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                            {{ __('Please Login') }}
+                                        </a>
+                                        @endplugin
+                                    @endif
+                                </form>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    @if(count($info['qa']) > 0)
+                        <div class="tab-pane" id="q_a_session">
+                            <div class="main_acc">
+                                @foreach($info['qa'] as $k => $question)
+                                    <div class="main_right_item">
+                                        <img src="{{ front_asset('img/zjt.png') }}" class="open @if($k==0)heid @endif"
+                                             alt="">
+                                        <img src="{{ front_asset('img/xjt.png') }}" class="Stow @if($k==0)block @endif"
+                                             alt="">
+                                        <p class="problen">
+                                            <span>Q:</span> <span>{{$question['content']}}</span>
+                                        </p>
+                                        @foreach($question['answers'] as $answer)
+                                            <div class="answer @if($k==0)block @endif">
+                                                <div>A:</div>
+                                                <div class="twostage">
+                                                    <div class="commentcontent">{{$answer['content']}}</div>
+                                                    <div class="acommenter">By {{$answer['author']}}
+                                                        on {{format_at($answer['updated_at'],'F d,Y')}}</div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                    
+                    @if(count($info['guideline']) > 0)
+                        <div class="tab-pane" id="guidelines">
+                            <div class="main_acc">
+                                @foreach($info['guideline'] as $k => $guideline)
+                                    <div class="main_right_item">
+                                        <h4>{{$guideline['title']}} </h4>
+                                        <p>{{$guideline['content']}}</p>
+                                        <img src="{{ front_asset('img/xjt.png') }}" style="width:10px" alt="">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </section>
+    {{ProductPart(['type'=>'related_product_area','id'=>'related_product_area','class'=>'related-part','heading'=>__('Related products'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>$info['id']])}}
+    {{ProductPart(['type'=>'get_latest_products','id'=>'latest_product_area','class'=>'latest-part','heading'=>__('New arrival products'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>null])}}
+    
+    @plugin('CMS')
+    {{ shows_card('in_detail') }}
+    @endplugin
+    
+    {{ enquiries_model($info) }}
+    
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="pswp__bg"></div>
+        <div class="pswp__scroll-wrap">
+            <div class="pswp__container">
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+                <div class="pswp__item"></div>
+            </div>
+            <div class="pswp__ui pswp__ui--hidden">
+                <div class="pswp__top-bar">
+                    <div class="pswp__counter"></div>
+                    <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                    <!--<button class="pswp__button pswp__button--share" title="Share"></button>-->
+                    <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                    <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                    <div class="pswp__preloader">
+                        <div class="pswp__preloader__icn">
+                            <div class="pswp__preloader__cut">
+                                <div class="pswp__preloader__donut"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                    <div class="pswp__share-tooltip"></div>
+                </div>
+                <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+                </button>
+                <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+                </button>
+                <div class="pswp__caption">
+                    <div class="pswp__caption__center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <input type="hidden" id="max_qty"
+           @if ($info['stock']['stock_status'] == 1) value="{{ $info['stock']['stock_qty'] }}" @else value="999" @endif>
+    <input type="hidden" id="term" value="{{ $info['id'] }}">
+    <input type="hidden" id="product_id" value="{{ $info['id'] }}">
+    <input type="hidden" id="product_href" value="{{ $info['detail_url'] }}">
+@endsection
+@push('js')
+    <script type="text/javascript">
+        const index = '{{$arguments['index']}}';
+        const final_amount = '{{$arguments['final_amount']}}';
+        let attrObj, calculate_amount;
+        if (detail_obj && detail_obj[index]) {
+            attrObj = detail_obj[index];
+        } else {
+            attrObj = detail_obj['default'];
+        }
+        //更新显示sku
+        $('#sku_area').text(attrObj.sku);
+        $('#cart_add_sku').val(attrObj.sku);
+        
+        //更新库存数量
+        $('#qty_area').text(attrObj.stock);
+        $('#qty').attr('max', attrObj.stock);
+        
+        //更新价格
+        if (!attrObj.ending_date) {
+            $('#main_amount').val(attrObj.regular_price);
+            $('#regular_amount').empty().hide();
+            $('#count_down b').empty();
+            $('#count_down').hide();
+            calculate_amount = parseFloat(attrObj.regular_price) + parseFloat(final_amount);
+        } else {
+            $('#main_amount').val(attrObj.price);
+            $('#regular_amount').text(amount_format(attrObj.regular_price)).show();
+            $('#count_down b').text(count_down(attrObj.ending_date));
+            $('#count_down').show();
+            calculate_amount = parseFloat(attrObj.price) + parseFloat(final_amount);
+        }
+        $('#amount').html(amount_format(calculate_amount));
+        
+        $('.single-product-sliderl').slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            arrows: true,
+            fade: true,
+            asNavFor: '.single-thumb-sliderl',
+            prevArrow: '<i class="iconfont bamdik">&#xe60e;</i>',
+            nextArrow: '<i class="iconfont dandik">&#xe60d;</i>',
+            responsive: [
+                {
+                    breakpoint: 576,
+                    settings: {
+                        slidesToShow: 1,
+                        slidesToScroll: 1,
+                        arrows: false,
+                    }
+                }
+            ]
+        });
+        
+        let th_sliderl = $('.single-thumb-sliderl').slick({
+            slidesToShow: 5,
+            slidesToScroll: 1,
+            asNavFor: '.single-product-sliderl',
+            dots: false,
+            arrows: false,
+            centerMode: false,
+            focusOnSelect: true,
+            infinite: true,
+            responsive: [
+                // {
+                //   breakpoint: 1000,
+                //   settings: {
+                //     slidesToShow: 7,
+                //     slidesToScroll: 1,
+                //     arrows: false,
+                //   }
+                // },
+                {
+                    breakpoint: 1000,
+                    settings: {
+                        slidesToShow: 4,
+                        slidesToScroll: 1,
+                        arrows: false,
+                        centerPadding: '1060px'
+                    }
+                },
+                {
+                    breakpoint: 991,
+                    settings: {
+                        slidesToShow: 3,
+                        slidesToScroll: 1,
+                        // centerPadding:'1060px',
+                        arrows: false,
+                    }
+                },
+                {
+                    breakpoint: 767,
+                    settings: {
+                        slidesToShow: 6,
+                        slidesToScroll: 1,
+                        // centerPadding:'160px',
+                        // rtl:false,
+                        // draggable: false,
+                        centerMode: false,
+                        arrows: false,
+                    }
+                },
+                {
+                    breakpoint: 576,
+                    settings: {
+                        slidesToShow: 3,
+                        slidesToScroll: 1,
+                        arrows: false,
+                    }
+                },
+                {
+                    breakpoint: 400,
+                    settings: {
+                        slidesToShow: 4,
+                        slidesToScroll: 1,
+                        arrows: false,
+                    }
+                }
+            ]
+        });
+        @if(isset($arguments['_s']))
+        //定位图片
+        $('.single-thumb-sliderl img.thumb-img').each(function (key, elem) {
+            if (attrObj.images[0] === $(elem).attr('src')) {
+                th_sliderl.slick('slickGoTo', key);
+            }
+        });
+        @endif
+    </script>
+    
+    <script src="{{ front_asset('js/photoswipe.js') }}"></script>
+    <script src="{{ front_asset('js/photoswipe-ui-default.js') }}"></script>
+    <script src="{{ front_asset('js/imagezoom.js') }}"></script>
+    <script src="{{ front_asset('js/details.js') }}"></script>
+	<!-- hover视频播放 -->
+	<script src="{{ front_asset('js/video.js')}}"></script>
+    <script src="{{ front_asset('js/swp.js') }}"></script>
+@endpush

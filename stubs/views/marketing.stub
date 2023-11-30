@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="{{ App::getlocale() }}">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		{{-- generate seo info --}}
+		{!! SEO::generate() !!}
+		{!! JsonLdMulti::generate() !!}
+		<meta name="csrf-token" content="{{ csrf_token() }}">
+		<link rel="icon" href="{{ asset('favicon.ico') }}">
+		{{ load_header() }}
+	</head>
+	
+	<body>
+		{!! $marketing->content !!}
+		
+		
+		@if($marketing->statistics_code)
+			{!! $marketing->statistics_code !!}
+		@endif
+		{{ load_footer() }}
+	</body>
+</html>
+

@@ -1,0 +1,134 @@
+<section class="{{$arguments['class']}}">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="section-heading">
+					<h2>{{$arguments['heading']}}</h2>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="product-slider" id="{{$arguments['id']}}">
+					@for($j=0; $j < $times ; $j++)
+						<div class="product-card default-product-card content-placeholder">
+							<div class="product-img">
+								<a href="#" class="text-dark">
+									<div class="content-placeholder product_preload"></div>
+								</a>
+							</div>
+							<div class="product-content">
+								<div class="product-name">
+									<h3></h3>
+									<p></p>
+								</div>
+								<div class="product-price">
+									<h4></h4>
+									<p></p>
+								</div>
+								<div class="product-cart"></div>
+							</div>
+						</div>
+					@endfor
+					
+					@foreach ($items as $item)
+						@php
+							if (count($item['categories']) > 0) {
+								$category_arr = [];
+								foreach ($item['categories'] as $cate) {
+									$category_arr[] = $cate['name'];
+								}
+								$category = implode('|',$category_arr);
+							} else{
+								$category = '';
+							}
+							$local = \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getCurrentLocale();
+						@endphp
+						
+						<div class="product-card dynamic-elements">
+							<div class="product-img">
+								@if($item['preview_type']=='video')
+									<video class="lazy" controlslist="nofullscreen" muted loop="loop" width="620" data-src="{{ $item['preview'] }}" data-poster="{{ asset('assets/images/lazy.gif') }}">
+										<source type="video/mp4" data-src="{{ $item['preview'] }}"/>
+									</video>
+								@else
+									<img data-src="{{ $item['preview'] }}" class="lazy" src="{{ asset('assets/images/lazy.gif') }}">
+								@endif
+								
+								@if($item['stock_status'] == 0)
+									<span class="new-badge">{{__('Stock Out')}}</span>
+								@else
+									@if($item['featured'] == 1)
+										<span class="new-badge">{{__('Trending')}}</span>
+									@elseif($item['featured'] == 2)
+										<span class="new-badge">{{__('Best selling')}}</span>
+									@endif
+								@endif
+								<ul class="product-widget">
+									<li>
+										@if($item['can_add'])
+											<a href="javascript:void(0)" onclick="cart_add({{ $item['id'] }})" class="cart_{{ $item['id'] }}">
+												<i class="fas fa-shopping-basket"></i>
+											</a>
+										@else
+											<a href="{{ $item['detail_url'] }}"><i class="fas fa-shopping-basket"></i></a>
+										@endif
+									</li>
+									<li><a href="{{ $item['detail_url'] }}"><i class="fas fa-search"></i></a></li>
+									<li>
+										<a class="wishlist_{{ $item['id'] }} @if(is_wishlist($item['id'])) active @endif" onclick="wishlist_add({{ $item['id'] }})">
+											@if(is_wishlist($item['id']))
+												<i class="fas fa-check"></i>
+											@else
+												<i class="fas fa-heart"></i>
+											@endif
+										</a>
+									</li>
+								</ul>
+							</div>
+							<div class="product-content">
+								<div class="product-cate">
+									<p>{{ $category }}</p>
+								</div>
+							</div>
+							<div class="product-name">
+								<a href="{{ $item['detail_url'] }}">
+									<h3>
+										@if(isset($item['i18ns'][$local]))
+											{{Str::limit($item['i18ns'][$local]['title'],120,'...')}}
+										@else
+											{{Str::limit($item['i18ns']['en']['title'],120,'...')}}
+										@endif
+									</h3>
+								</a>
+							</div>
+							<div class="product-price">
+								<p>
+									@if ($item['type']=='with')
+										@if (in_array($item['price']['derate_type'],[1,2]))
+											<del>{{ amount_format_fe($item['price']['regular_price']) }}</del>
+											{{ amount_format_fe($item['price']['price']) }}
+										@else
+											{{ amount_format_fe($item['price']['regular_price']) }}
+										@endif
+									@else
+										{{ amount_format_fe($item['price']['regular_price']) }}
+									@endif
+								</p>
+								<ul class="product-rating">
+									<li><i class="fas fa-star"></i><span>({{ $item['reviews_count'] }})</span></li>
+								</ul>
+							</div>
+						</div>
+					@endforeach
+				</div>
+			</div>
+		</div>
+		<center class="section-more">
+			<a href="{{$arguments['more_url']}}" class="btn btn-outline">
+				<i class="fas fa-eye"></i>{{$arguments['more_text']}}
+			</a>
+		</center>
+	</div>
+</section>
+

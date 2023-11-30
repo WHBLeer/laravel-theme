@@ -34,19 +34,19 @@ class DownLoadCommand extends Command
 
                 return $rows;
             }, []);
-            $this->comment(__('themes.theme_list'));
+            $this->comment(__('theme_list'));
 
             $this->table([
-                __('themes.serial_number'),
-                __('themes.name'),
-                __('themes.author'),
-                __('themes.download_times'),
+                __('serial_number'),
+                __('theme_name'),
+                __('author'),
+                __('download_times'),
             ], $rows);
 
-            $sn = $this->ask(__('themes.input_sn'));
+            $sn = $this->ask(__('input_sn'));
 
             if (! $theme = data_get($themes, $sn)) {
-                throw new \InvalidArgumentException(__('themes.sn_not_exist'));
+                throw new \InvalidArgumentException(__('sn_not_exist'));
             }
 
             $versions = array_map(fn ($version) => [
@@ -58,28 +58,28 @@ class DownLoadCommand extends Command
                 $version['price'],
             ], data_get($theme, 'versions'));
 
-            $this->comment(__('themes.version_list'));
+            $this->comment(__('version_list'));
 
             $this->table([
-                __('themes.id'),
-                __('themes.version'),
-                __('themes.description'),
-                __('themes.download_times'),
-                __('themes.status'),
-                __('themes.price'),
+                __('id'),
+                __('version'),
+                __('description'),
+                __('download_times'),
+                __('status'),
+                __('price'),
             ], $versions);
 
-            $versionId = $this->ask(__('themes.input_version_id'));
+            $versionId = $this->ask(__('input_version_id'));
 
             if (! in_array($versionId, Arr::pluck($theme['versions'], 'id'))) {
-                throw new \InvalidArgumentException(__('themes.version_not_exist'));
+                throw new \InvalidArgumentException(__('version_not_exist'));
             }
 
             Storage::put($path, app('themes.client')->download($versionId));
 
             Artisan::call('theme:install', ['path' => Storage::path($path)]);
 
-            $this->info(__('themes.download_successful'));
+            $this->info(__('download_successful'));
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
 

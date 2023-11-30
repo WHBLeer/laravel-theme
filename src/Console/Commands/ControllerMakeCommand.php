@@ -55,16 +55,17 @@ class ControllerMakeCommand extends GeneratorCommand
         $theme = $this->getTheme();
 
         return (new Stub($this->getStubName(), [
-            'THEMENAME'        => $theme->getStudlyName(),
+            'PLUGINNAME'        => $theme->getStudlyName(),
             'CONTROLLERNAME'    => $this->getControllerName(),
             'NAMESPACE'         => $theme->getStudlyName(),
             'CLASS_NAMESPACE'   => $this->getClassNamespace($theme),
             'CLASS'             => $this->getControllerNameWithoutNamespace(),
-            'LOWER_NAME'        => $theme->getLowerName(),
-            'THEME'            => $this->getThemeName(),
+	        'LOWER_NAME'        => $theme->getLowerName(),
+	        'UPPER_NAME'        => $theme->getUpperName(),
+            'PLUGIN'            => $this->getThemeName(),
             'NAME'              => $this->getThemeName(),
             'STUDLY_NAME'       => $theme->getStudlyName(),
-            'THEME_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
+            'PLUGIN_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
         ]))->render();
     }
 

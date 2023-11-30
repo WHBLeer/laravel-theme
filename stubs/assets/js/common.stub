@@ -1,0 +1,486 @@
+"use strict";
+/******************************通用*********************************/
+/**
+ * 处理分页
+ * @param target
+ * @param data
+ */
+function pagination(target, data, flag='product'){
+	$('.page-item').remove();
+	$.each(data, function(key,value){
+		let url;
+		let is_active;
+		let is_disabled;
+		let html = [];
+		if(value.label === '&laquo; Previous'){
+			if(value.url === null){
+				is_disabled = 'disabled';
+				is_active = null;
+			} else{
+				is_active = 'page-link-no'+key;
+				is_disabled = 'onclick="PaginationClicked(\''+key+'\',\''+flag+'\')"';
+			}
+			html.push('<li class="page-item">');
+			html.push('		<a '+is_disabled+' class="page-link '+is_active+'" href="javascript:void(0)" data-url="'+value.url+'">');
+			html.push('			<i class="fas fa-long-arrow-alt-left"></i>');
+			html.push('		</a>');
+			html.push('</li>');
+		} else if(value.label === 'Next &raquo;'){
+			if(value.url === null){
+				is_disabled = "disabled";
+				is_active = null;
+			} else{
+				is_active = 'page-link-no'+key;
+				is_disabled = 'onclick="PaginationClicked(\''+key+'\',\''+flag+'\')"';
+			}
+			html.push('<li class="page-item">');
+			html.push('		<a '+is_disabled+' class="page-link '+is_active+'" href="javascript:void(0)" data-url="'+value.url+'">');
+			html.push('			<i class="fas fa-long-arrow-alt-right"></i>');
+			html.push('		</a>');
+			html.push('</li>');
+		} else{
+			if(value.active){
+				is_active = "active";
+				is_disabled = "disabled";
+				url = null;
+			} else{
+				is_active = 'page-link-no'+key;
+				is_disabled = 'onclick="PaginationClicked(\''+key+'\',\''+flag+'\')"';
+				url = value.url;
+			}
+			html.push('<li class="page-item">');
+			html.push('		<a '+is_disabled+' class="page-link '+is_active+'" href="javascript:void(0)" data-url="'+url+'">');
+			html.push('			'+value.label);
+			html.push('		</a>');
+			html.push('</li>');
+		}
+		if(value.url !== null){
+			$(target).append(html.join('\n'));
+		}
+	});
+}
+
+/******************************产品*********************************/
+/**
+ * 产品详情
+ */
+function detail_products_data() {
+	$('.slider_preload').removeClass('content-placeholder').removeClass('slider_preload');
+	$('.content-placeholder').remove();
+	// 删除无元素的dom
+	let product_dom = 0;
+	if ($('#related_product_area').children('div.product-card').length > 0){
+		product_dom++;
+	} else {
+		$('.related-part').remove();
+	}
+	if ($('#latest_product_area').children('div.product-card').length > 0) {
+		product_dom++;
+	} else {
+		$('.latest-part').remove();
+	}
+
+	if (product_dom>0) {
+		product_slider();
+		run_lazy();
+	}
+
+	$('.dynamic-elements').show();
+
+}
+
+/**
+ * 处理评论
+ * @param url
+ */
+function product_review(url){
+	$.ajax({
+		type: 'get',
+		url: url,
+		dataType: 'json',
+		success: function(response) {
+			$('.review-item').remove();
+			$.each(response.data, function(key, value) {
+				let html = [];
+				html.push('<li class="review-item">');
+				html.push('		<div class="reviewer-img">');
+				html.push('			<a href="#"><img src="https://ui-avatars.com/api/?background=random&color=fff000&name=' + value.name + '" alt="' + value.name + '"></a>');
+				html.push('		</div>');
+				html.push('		<div class="reviewer-descrip">');
+				html.push('			<div class="reviewer-meta">');
+				html.push('				<a href="#">' + value.name + '</a>');
+				html.push('				<p>' + value.created_at + '</p>');
+				html.push('			</div>');
+				html.push('			<ul class="reviewer-rating rev_ar' + key + '"></ul>');
+				html.push('			<div class="reviewer-quote">');
+				html.push('				<p>' + escapeHtml(value.comment) + '</p>');
+				html.push('			</div>');
+				html.push('		</div>');
+				html.push('</li>');
+				$('.review-list').append(html.join('\n'));
+				review_star(key,value.rating);
+			});
+
+			if(response.links.links.length > 3) {
+				pagination('.pagination',response.links.links,'product');
+			}
+		}
+	})
+}
+
+/**
+ * 评论星级
+ * @param key
+ * @param rating
+ */
+function review_star(key,rating){
+	let cl;
+	for(let i = 0; i < 5; i++){
+		if(i < rating){
+			cl = "fas fa-star active";
+		} else{
+			cl = 'fas fa-star';
+		}
+		const html = '<li><i class="' + cl + '"></i>';
+		$('.rev_ar'+key).append(html);
+	}
+}
+
+/**
+ * 产品列表参数处理
+ */
+function shop_filter_params()
+{
+	let params = {},variant = [],brand = [],category = [];
+	params.ob = $("#order_by option:selected").val();
+
+	$('.attributes:checkbox:checked').each(function () {
+		const val = parseInt($(this).val());
+		variant.push(val);
+	});
+	$('.brands:checkbox:checked').each(function () {
+		const v = parseInt($(this).val());
+        brand.push(v);
+	});
+	$('.categories:checkbox:checked').each(function () {
+		const v = parseInt($(this).val());
+        category.push(v);
+	});
+    const keyword = $('input[name=keyword]').val();
+	if (variant.length>0) params.variant = variant;
+	if (brand.length>0) params.brand = brand;
+	if (category.length>0) params.category = category;
+    if (keyword.length>0) params.keyword = keyword;
+
+    console.log(params);
+    const urlParams = new URLSearchParams(params);
+    const urlString = urlParams.toString();
+    window.location.href = base_url+'/shop'+'?'+urlString;
+}
+
+/**
+ * 产品详情参数处理
+ */
+function detail_filter_params()
+{
+	let params = {},variation = [],option = [];
+    params._s = new Date().getTime();
+    params.Q = $("#qty").val()??1;
+
+	$('input.att-variation:checked').each(function () {
+		const att = parseInt($(this).val());
+		variation.push(att);
+	});
+	$('input.app-variation:checked').each(function () {
+		const app = parseInt($(this).val());
+		option.push(app);
+	});
+
+	if (variation.length>0) params.V = variation;
+	if (option.length>0) params.O = option;
+
+	let url = window.location.href;
+	let old_search = window.location.search;
+	let new_search = urlEncode(params);
+	let index = new_search.indexOf("&");
+	new_search = new_search.substring(index + 1,new_search.length);
+
+	let new_url = '';
+	if (old_search.length===0){
+		new_url = url + '?' + new_search;
+	} else {
+		if (old_search=== '?' + new_search) {
+			new_url = false;
+		} else {
+			new_url = url.replace(old_search, '?' + new_search);
+		}
+	}
+	return new_url
+}
+
+/**
+ * 分页点击事件
+ * @param key
+ * @param flag
+ * @constructor
+ */
+function PaginationClicked(key,flag=null){
+	const url = $('.page-link-no' + key).data('url');
+	product_review(url);
+}
+
+/******************************购物车*********************************/
+/**
+ * 加购物车
+ * @param id
+ */
+function cart_add(id){
+	let load_dom = [];
+	load_dom.push('<div class="spinner-border spinner-border-sm text-white" role="status">');
+	load_dom.push('		<span class="sr-only">Loading...</span>');
+	load_dom.push('</div>');
+	$('.cart_'+id).html(load_dom.join('\n'));
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+	$.ajax({
+		type: 'post',
+		url: base_url+'/cart/add',
+		data: {"id":id},
+		dataType: 'json',
+		success: function(response){
+            Sweet('success','Cart Added')
+			render_cart(response);
+			$('.cart_'+id).removeAttr('onclick').attr('href',base_url+'/cart').html('<i class="fas fa-check"></i>');
+		}
+	});
+}
+
+/**
+ * 删除购物车
+ * @param rowId
+ */
+function cart_remove(rowId,page=null){
+	rowId = rowId || $('#'+rowId).val();
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'post',
+		url: base_url+'/cart/remove',
+		data:{"rowId":rowId},
+		dataType: 'json',
+		success: function(response){
+			Sweet('success','Cart Item Deleted successfully')
+            $('.cart-row-'+rowId).remove();
+            $('#cart_count').html(response.count);
+            $('#cart_total').html(amount_format(response.total));
+            $('#cart_sub_total').html(amount_format(response.subtotal));
+			if (page) {
+				window.location.reload();
+			}
+		},
+        error: function(xhr, status, error) {
+            $.each(xhr.responseJSON.errors, function (key, item) {
+                Sweet('error',item)
+            });
+        }
+	});
+}
+
+/**
+ * 加入收藏
+ * @param id
+ */
+function wishlist_add(id) {
+    const _this = $('.wishlist_'+id);
+    const is_active = _this.hasClass('active');
+    let url = base_url+'/wishlist/add';
+    if (is_active) url = base_url+'/wishlist/remove';
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'post',
+		url: url,
+		data:{"id":id},
+		dataType: 'json',
+		beforeSend: function() {
+			let load_dom = [];
+			load_dom.push('<div class="spinner-border spinner-border-sm text-white" role="status">');
+			load_dom.push('		<span class="sr-only">Loading...</span>');
+			load_dom.push('</div>');
+			$('.wishlist_'+id).html(load_dom.join('\n'));
+		},
+		success: function(response){
+			if (response==-1) {
+				//导航到登录
+				window.location.href = base_url+'/user/login/';
+			}
+            $('.wishlist_count').html(response)
+            if (is_active) {
+                _this.html('<i class="fas fa-heart"></i>').removeClass('active');
+                Sweet('success', 'Remove success from your wish list');
+            } else {
+                _this.html('<i class="fas fa-check"></i>').addClass('active');
+                Sweet('success', 'Successfully added to wish list');
+            }
+		}
+	});
+}
+
+/**
+ * 删除收藏
+ * @param id
+ */
+function wishlist_remove(id) {
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		type: 'post',
+		url: base_url+'/wishlist/remove/',
+		data:{"id":id},
+		dataType: 'json',
+		success: function(response){
+			Sweet('success','Remove success from your wish list');
+			setTimeout(function(){
+				window.location.reload();
+			}, 1500);
+		}
+	});
+}
+
+// 处理购物车
+function render_cart(data){
+	$('#cart_sub_total').html(amount_format(data.subtotal));
+	$('#cart_total').html(amount_format(data.total));
+	$('#cart_count').html(data.count);
+	$('.cart-item').remove();
+	$.each(data.cart_add, function(index, value){
+		const rowId = value.rowId;
+		const term_id = value.id;
+		let html = [];
+		html.push('<li class="cart-item cart-row-' + rowId + '">');
+		html.push('		<div class="cart-img">');
+		html.push('			<a href="' + base_url + '/product/' + value.name + '/' + term_id + '">');
+        if (value.options.preview_type=='video') {
+            html.push('			<video src="' + value.options.preview + '" ></video>');
+        } else {
+            html.push('			<img src="' + value.options.preview + '" >');
+        }
+		html.push('			</a>');
+		html.push('		</div>');
+		html.push('		<div class="cart-info">');
+		html.push('			<a href="' + value.options.detail_url + '">'+value.name+'</a>');
+		html.push('				<p>' + value.qty + ' x <span>' + value.price + '</span></p>');
+		html.push('		</div>');
+		html.push('		<div class="cart-remove">');
+		html.push('			<a href="javascript:void(0)" onclick="cart_remove(\'' + rowId + '\')">');
+		html.push('				<i class="fas fa-times"></i>');
+		html.push('			</a>');
+		html.push('		</div>');
+		html.push('		<input type="hidden" value="' + rowId + '" id="' + rowId + '">');
+		html.push('</li>');
+		$('.cart-list').append(html.join('\n'));
+	});
+}
+
+
+
+
+
+/******************************结算*********************************/
+/**
+ *
+ * @returns {number}
+ */
+function my_discount() {
+	let discount_data = $('#discount_data');
+	let discount = 0;
+	discount += parseFloat(discount_data.data('coupon'));
+	discount += parseFloat(discount_data.data('discount'));
+	discount += parseFloat(discount_data.data('giftcard'));
+	discount += parseFloat(discount_data.data('shipping'));
+	discount += parseFloat(discount_data.data('auto_discount'));
+	return discount;
+}
+
+function apply_discount(data) {
+	$.ajaxSetup({
+		headers: {
+			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+		}
+	});
+	$.ajax({
+		url: $("#apply_url").val(),
+		type: "POST",
+		data: data,
+		success: function(result) {
+			let discount_data = $('#discount_data');
+			if (result.type==='coupon') {
+				$('#code_coupon').val(JSON.stringify(result));
+				discount_data.data('coupon',result.val);
+				$('#coupon-amount').html('-'+amount_format(discount_data.data('coupon')));
+			} else if (result.type==='giftcard') {
+				$('#code_giftcard').val(JSON.stringify(result));
+				discount_data.data('giftcard',result.val);
+				$('#giftcard-amount').html('-'+amount_format(discount_data.data('giftcard')));
+			} else if (result.type==='discount') {
+				if (result.overlay) {
+					let val = discount_data.data('discount') + result.val;
+					let code = $('#code_discount').val()
+					let codes = (code.length>0)?JSON.parse(code):[];
+					codes.push(result);
+					$('#code_discount').val(JSON.stringify(codes));
+					discount_data.data('discount',val);
+				} else {
+					$('#code_discount').val(JSON.stringify(result));
+					discount_data.data('discount',result.val);
+				}
+				$('#discount-amount').html('-'+amount_format(discount_data.data('discount')+discount_data.data('auto_discount')));
+			} else {
+				if (result.overlay) {
+					let val = discount_data.data('shipping') + result.val;
+					let code = $('#code_shipping').val()
+					let codes = (code.length>0)?JSON.parse(code):[];
+					codes.push(result);
+					$('#code_shipping').val(JSON.stringify(codes));
+					discount_data.data('shipping',val);
+				} else {
+					$('#code_shipping').val(JSON.stringify(result));
+					discount_data.data('shipping',result.val);
+				}
+
+				$('#shipping-amount').html('-'+amount_format(discount_data.data('shipping')));
+				$('.shipping_discount').show();
+			}
+
+			const total_amount = parseFloat($('#total_amount').val());
+			let shipping = 0;
+			if(typeof $('#shipping_charge').data('shipping')!=='undefined'){
+				shipping = parseFloat($('#shipping_charge').data('shipping'));
+			}
+
+			let discount = my_discount()
+			const calculate = total_amount+shipping-discount;
+			$('#cart-amount').html(amount_format(calculate));
+		},
+		error: function(xhr, status, error) {
+			$.each(xhr.responseJSON.errors, function (key, item) {
+				Sweet('error',item)
+				$("#errors").html("<li class='text-danger'>"+item+"</li>")
+			});
+		}
+	});
+}
+
+

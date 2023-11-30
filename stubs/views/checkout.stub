@@ -1,0 +1,333 @@
+@extends(front_view('layouts.app'),['header'=>__('Checkout'),'breadcrumbs'=>[['url'=>null,'title'=>__('Checkout')]]])
+@push('css')
+<link rel="stylesheet" type="text/css" href="{{ front_asset('css/checkout.css') }}">
+@endpush
+@section('content')
+@if(!isset($order))
+	<div class="container padding-bottom-3x mb-2 mt-5">
+		<div class="card text-center">
+			<div class="card-body padding-top-2x">
+				<h3 class="card-title">{{ __('Your shopping cart is empty') }}</h3>
+				<p class="card-text">{{ __('You can browse the products and add them to the shopping cart before you checkout.') }}</p>
+				<div class="padding-top-1x padding-bottom-1x"><a class="btn btn-inline"
+																 href="{{ url('/shop') }}">{{ __('Go Back Shopping') }}</a>
+				</div>
+			</div>
+		</div>
+	</div>
+@else
+	<form action="{{ url('/make_order/'.$order->order_no) }}" class="checkout_form" method="post">
+		@csrf
+		<div class="section">
+			<div class="container">
+				<div class="row">
+					<div class="col-xl-7">
+						<!-- Buyer Info Start -->
+						<h4>{{ __('Billing Details') }}</h4>
+						@if (!customer_check())
+							@plugin('UCenter')
+							<div class="uclassic_notice">
+								<p>
+									{{ __('Are you a frequenter?') }}
+									<a href="{{u_login()}}">{{ __('Click here to login') }}</a>
+								</p>
+							</div>
+							@endplugin
+						@endif
+						@if (session('error'))
+							<div class="alert alert-danger alert-dismissible fade show" role="alert">
+								{{ session('error') }}
+								<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+						@endif
+						<div class="row">
+							<div class="form-group col-xl-12">
+								<label>{{ __('Name') }} <span class="text-danger">*</span></label>
+								<input type="text" placeholder="Full Name" name="name" class="form-control"
+									   required=""
+									   value="{{ customer()->name ?? '' }}">
+							</div>
+							<div class="form-group col-xl-6">
+								<label>{{ __('Email Address') }} <span class="text-danger">*</span></label>
+								<input type="email" placeholder="Email Address" name="email" class="form-control"
+									   required="" value="{{ customer()->email ?? '' }}"
+									   id="customer_email">
+							</div>
+							<div class="form-group col-xl-6">
+								<label>{{ __('Phone Number') }} <span class="text-danger">*</span></label>
+								<input type="text" placeholder="Phone Number" name="phone" class="form-control"
+									   value="{{ customer()->phone ?? '' }}"
+									   required="">
+							</div>
+							@if (!customer_check())
+								<div class="form-group col-xl-12">
+									<label><input type="checkbox" name="create_account" value="1"
+												  class="create_account">{{ __('With Create Account') }}</label>
+								</div>
+							@endif
+							@if (count($countries) > 0)
+								<div class="form-group col-xl-4">
+									<label>{{ __('Country') }} <span class="text-danger">*</span></label>
+									<select class="form-control dept_select" id="country" name="country">
+										<option selected disabled value="">{{ __('Select Country') }}</option>
+										@foreach ($countries as $country)
+											<option value="{{ $country['id'] }}"
+													data-shippings="{{ $country['shippings'] }}">{{ $country['name'] }}
+												[{{ $country['shortname'] }}]
+											</option>
+										@endforeach
+									</select>
+								</div>
+								<div class="form-group col-xl-4">
+									<label>{{ __('Province/State') }} <span class="text-danger">*</span></label>
+									<select class="form-control dept_select" id="province" name="province">
+										<option selected disabled
+												value="">{{ __('Select Province/State') }}</option>
+									</select>
+								</div>
+								<div class="form-group col-xl-4">
+									<label>{{ __('City') }} </label>
+									<select class="form-control dept_select" id="city" name="city">
+										<option selected disabled value="">{{ __('Select City') }}</option>
+									</select>
+								</div>
+							@endif
+							
+							<div class="form-group col-xl-8">
+								<label>{{ __('Delivery Address') }} <span class="text-danger">*</span></label>
+								<input type="text" placeholder="Delivery Address" name="address"
+									   class="form-control" value="" required="">
+							</div>
+							
+							<div class="form-group col-xl-4">
+								<label>{{ __('Zip Code') }}<span class="text-danger">*</span></label>
+								<input type="number" placeholder="Zip Code" name="zip_code" class="form-control"
+									   value="" required="">
+							</div>
+							@if(!!$discounts['customer_gift_cards'])
+								{{-- 选择礼品卡 --}}
+								<div class="form-group discount-line col-xl-12">
+									<label>{{ __('Discount') }}</label>
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<div class="input-group-text">{{ __('Gift Card') }}</div>
+										</div>
+										<select id="customer_gift_card" class="form-control customer_gift_card">
+											<option value="" data-amount="0"></option>
+											@foreach ($discounts['customer_gift_cards'] as $giftCard)
+												@if (amount_format_fe($giftCard['gift_card']['amount']) < $cartAmount)
+													<option data-code="{{ $giftCard['gift_card']['code'] }}"
+															value="{{ $giftCard['id'] }}">
+														{{ $giftCard['gift_card']['code'] }}
+														| {{ amount_format_fe($giftCard['gift_card']['amount']) }}
+													</option>
+												@endif
+											@endforeach
+										</select>
+									</div>
+								</div>
+							@endif
+							@if(!!$discounts['customer_coupons'])
+								{{-- 选择优惠券 --}}
+								<div class="form-group discount-line col-xl-12">
+									<div class="input-group">
+										<div class="input-group-prepend">
+											<div class="input-group-text">{{ __('Coupon Code') }}</div>
+										</div>
+										<select id="customer_coupon" class="form-control customer_coupon">
+											<option value="" data-amount="0"></option>
+											@foreach ($discounts['customer_coupons'] as $coupon)
+												<option data-code="{{ $coupon['coupon']['code'] }}"
+														value="{{ $coupon['id'] }}">
+													{{ $coupon['coupon']['code'] }}
+													| {{ amount_format_fe(($coupon['coupon']['percent']*$priceTotal)/100) }}
+												</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+							@endif
+							{{-- 输入折扣码 --}}
+							<div class="form-group discount-line col-xl-12">
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<div class="input-group-text">{{ __('Discount Code') }}</div>
+									</div>
+									<input type="text" id="discount_code" class="form-control discount_code"
+										   placeholder="Please Type in Discount Code">
+									<div class="input-group-append">
+										<button class="button" type="button"
+												id="confirm_discount_code">{{ __('Apply') }}</button>
+									</div>
+								</div>
+							</div>
+							<div class="form-group col-xl-12 mb-0">
+								<label>{{ __('Order Notes') }}</label>
+								<textarea name="comment" rows="5" class="form-control"
+										  placeholder="Order Notes (Optional)"></textarea>
+							</div>
+						</div>
+						<!-- Buyer Info End -->
+					
+					</div>
+					<div class="col-xl-5 checkout-billing">
+						<!-- Order Details Start -->
+						<table class="uclassic_responsive-table">
+							<thead>
+							<tr>
+								<th>{{ __('Product') }}</th>
+								<th align="right">{{ __('Quantity') }}</th>
+								<th>{{ __('Total') }}</th>
+							</tr>
+							</thead>
+							<tbody>
+							@foreach ($order->items as $row)
+								<tr>
+									<td data-title="Product">
+										<div class="uclassic_cart-product-wrapper">
+											<div class="uclassic_cart-product-body">
+												<h6>
+													<a href="{{ url($row->info['detail_url']) }}">{{ $row->name }}</a>
+												</h6>
+												@foreach ($row->info['attributes'] as $attribute)
+													<p>
+														<b>{{ $attribute['parent']['name'] }}</b>:{{ $attribute['name'] }}
+													</p>
+												@endforeach
+												@foreach ($row->info['options'] as $option)
+													<p><b>{{ $option['parent']['name'] }}</b>:{{ $option['name'] }}
+													</p>
+												@endforeach
+												<p>{{ $row->qty }} {{ __('Piece') }}</p>
+											</div>
+										</div>
+									</td>
+									<td data-title="Quantity" align="right">x{{ $row->qty }}
+										<input type="hidden" class="cart_quantity" data-price="{{$row->amount}}"
+											   value="{{ $row->qty }}">
+										<input type="hidden" class="cart_weight" value="{{ $row->info['weight'] }}">
+										<input type="hidden" class="cart_volume_weight"
+											   value="{{ $row->info['volume_weight'] }}">
+									</td>
+									<td data-title="Total">
+										<strong>{{ amount_format_fe($row->amount*$row->qty) }}</strong></td>
+								</tr>
+							@endforeach
+							<tr class="total none shipping_charge">
+								<th>
+									<h6 class="mb-0">{{ __('Shipping Charge') }}</h6>
+								</th>
+								<td align="right">
+									<span id="shipping_quantity"></span>
+									<input type="hidden" name="shipping_fee" id="shipping_fee">
+									<input type="hidden" name="quantity" id="cart_quantity">
+									<input type="hidden" name="weight" id="cart_weight">
+									<input type="hidden" name="volume_weight" id="cart_volume_weight">
+								</td>
+								<td><strong id="shipping_charge">{{amount_format_fe(0)}}</strong></td>
+							</tr>
+							
+							<tr class="total">
+								<th colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Tax') }}</h6>
+								</th>
+								<td>
+									<strong>{{ amount_format_fe(Cart::instance(session('cart_key'))->tax()) }}</strong>
+								</td>
+							</tr>
+							<tr class="total shipping_discount" style="display: none">
+								<th colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Shipping Discount') }}</h6>
+								</th>
+								<td><strong id="shipping-amount">{{amount_format_fe(0)}}</strong></td>
+							</tr>
+							<tr class="total">
+								<th colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Discount') }}</h6>
+								</th>
+								<td>
+									<strong id="discount-amount">-{{ amount_format_fe($discounts['auto_discount']??0) }}</strong>
+								</td>
+							</tr>
+							<tr class="total">
+								<th colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Coupon') }}</h6>
+								</th>
+								<td><strong id="coupon-amount">{{amount_format_fe(0)}}</strong></td>
+							</tr>
+							<tr class="total">
+								<td colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Gift Card') }}</h6>
+								</td>
+								<td><strong id="giftcard-amount">{{amount_format_fe(0)}}</strong></td>
+							</tr>
+							<tr class="total">
+								<td colspan="2" align="right">
+									<h6 class="mb-0">{{ __('Grand Total') }}</h6>
+								</td>
+								<td><strong class="total_cost_amount"
+											id="cart-amount">{{amount_format_fe($cartAmount-($discounts['auto_discount']??0))}}</strong>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+						<div class="uclassic-checkout-payment none">
+							<h6>{{ __('Select Shipping Mode') }}</h6>
+							<hr>
+							
+							<ul class="wc_payment_methods shipping_methods">
+							
+							</ul>
+						</div>
+						<div id="payment" class="uclassic-checkout-payment mt-3">
+							
+							<h6>{{ __('Select Payment Mode') }}</h6>
+							<hr>
+							
+							<ul class="wc_payment_methods payment_methods">
+								@foreach ($payment_methods as $key => $row)
+									<li class="wc_payment_method payment_method_bacs">
+										<input id="payment_method_{{ $key }}" type="radio" class="input-radio"
+											   name="payment_method" value="{{ $row['id'] }}"
+											   @if ($key == 0) checked="checked" @endif>
+										<label for="payment_method_{{ $key }}">{{ $row['settings']['title'] }} </label>
+										<div class="payment_box payment_method_{{ $key }}">
+											<p>{{ $row['settings']['description'] }}</p>
+										</div>
+									</li>
+								@endforeach
+							</ul>
+						</div>
+						
+						<button type="submit" id="submit_order"
+								class="uclassic_btn-custom primary btn-block mt-2 checkout_submit_btn">{{ __('Place Order') }}</button>
+						<!-- Order Details End -->
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<input type="hidden" name="discount[coupon]" id="code_coupon"/>
+		<input type="hidden" name="discount[giftcard]" id="code_giftcard"/>
+		<input type="hidden" name="discount[shipping]" id="code_shipping"/>
+		<input type="hidden" name="discount[discount]" id="code_discount"/>
+		<input type="hidden" name="discount[auto_discount]" id="code_auto_discount"
+			   value="{{ isset($discounts['auto_discount_code'])?json_encode($discounts['auto_discount_code']):'' }}"/>
+	</form>
+	<input type="hidden" value="{{ $cartAmount }}" id="total_amount"/>
+	<input type="hidden" value="{{ $shipping_id }}" id="shipping_id"/>
+	<input type="hidden" value="{{ url('/apply') }}" id="apply_url"/>
+	<input type="hidden" value="{{ url('/checkout_location') }}" id="areas_url"/>
+	<input type="hidden" id="discount_data"
+		   data-coupon="0"
+		   data-giftcard="0"
+		   data-discount="0"
+		   data-shipping="0"
+		   data-auto_discount="{{ $discounts['auto_discount']??0 }}"/>
+@endif
+@endsection
+@push('js')
+<script src="{{ front_asset('js/checkout.js') }}"></script>
+@endpush

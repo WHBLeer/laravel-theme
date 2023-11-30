@@ -1,0 +1,5 @@
+<div class="ads-slider dynamic-elements">
+	@foreach($items as $item)
+		<a href="{{$item['link']}}"><img src="{{ _F($item['advert']['path']) }}" alt="{{$item['alt']}}"></a>
+	@endforeach
+</div>

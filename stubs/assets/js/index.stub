@@ -1,0 +1,35 @@
+(function ($) {
+	$('.slider_preload').removeClass('content-placeholder').removeClass('slider_preload');
+	$('.content-placeholder').remove();
+	banner_slider();
+	offer_slider();
+	ads_slider();
+	// 删除无元素的dom
+	let product_dom = 0;
+	if ($('#bast_selling_product_area').children('div.product-card').length > 0){
+		product_dom++;
+	} else {
+		$('.best-part').remove();
+	}
+	if ($('#trending_product_area').children('div.product-card').length > 0) {
+		product_dom++;
+	} else {
+		$('.trend-part').remove();
+	}
+	if ($('#offerable_products_area').children('div.product-card').length > 0){
+		product_dom++;
+	} else {
+		$('.offerable-part').remove();
+	}
+	if ($('#latest_product_area').children('div.product-card').length > 0) {
+		product_dom++;
+	} else {
+		$('.latest-part').remove();
+	}
+	
+	if (product_dom>0) {
+		product_slider();
+		run_lazy();
+	}
+	$('.dynamic-elements').show();
+})(jQuery);

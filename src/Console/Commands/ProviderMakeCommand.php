@@ -79,15 +79,18 @@ class ProviderMakeCommand extends GeneratorCommand
             'NAMESPACE'         => $this->getClassNamespace($theme),
             'CLASS'             => $this->getClass(),
             'LOWER_NAME'        => $theme->getLowerName(),
-            'THEME'            => $this->getThemeName(),
+	        'UPPER_NAME'        => $theme->getUpperName(),
+            'PLUGIN'            => $this->getThemeName(),
             'NAME'              => $this->getFileName(),
             'STUDLY_NAME'       => $theme->getStudlyName(),
-            'THEME_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
+            'PLUGIN_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
             'PATH_VIEWS'        => GenerateConfigReader::read('views')->getPath(),
             'PATH_LANG'         => GenerateConfigReader::read('lang')->getPath(),
-            'PATH_CONFIG'       => GenerateConfigReader::read('config')->getPath(),
-            'MIGRATIONS_PATH'   => GenerateConfigReader::read('migration')->getPath(),
-            'FACTORIES_PATH'    => GenerateConfigReader::read('factory')->getPath(),
+	        'PATH_CONFIG'       => GenerateConfigReader::read('config')->getPath(),
+	        'PATH_SUPPORT'      => GenerateConfigReader::read('support')->getPath(),
+	        'PATH_ASSETS'       => GenerateConfigReader::read('assets')->getPath(),
+	        'MIGRATIONS_PATH'   => GenerateConfigReader::read('migration')->getPath(),
+	        'FACTORIES_PATH'    => GenerateConfigReader::read('factory')->getPath(),
         ]))->render();
     }
 

@@ -1,0 +1,38 @@
+[
+	{
+		"name": "SYSTEM",
+		"route_name": null,
+		"icon": "icon-product",
+		"params": null,
+		"is_show": 1,
+		"is_menu": 2,
+		"children": [
+			{
+				"name": "Theme Management",
+				"route_name": null,
+				"icon": "icon-product",
+				"params": null,
+				"is_show": 1,
+				"is_menu": 1,
+				"children": [
+					{
+						"name": "Native Theme",
+						"route_name": "seller.theme.list",
+						"icon": "icon-product",
+						"params": null,
+						"is_show": 1,
+						"is_menu": 1
+					},
+					{
+						"name": "Theme Market",
+						"route_name": "seller.theme.market",
+						"icon": "icon-product",
+						"params": null,
+						"is_show": 1,
+						"is_menu": 1
+					}
+				]
+			}
+		]
+	}
+]

@@ -14,5 +14,3 @@ trait CanClearThemesCache
         }
     }
 }
-
-

@@ -1,0 +1,231 @@
+
+(function ($) {
+	"use strict";
+	$('#country').on('change',function () {
+		const areas_url = $('#areas_url').val();
+		const shipping_id = $('#shipping_id').val();
+		const country = $(this).find('option:selected').val();
+		const option = $(this).find('option:selected').data('shippings');
+		let province = '<option selected disabled value="">Select Province</option>';
+		let city = '<option selected disabled value="">Select City</option>';
+
+		$('.payment_mode').remove();
+		$("#province").html(province)
+		$("#city").html(city)
+
+		let quantity = 0;let weight = 0;let volume_weight = 0;
+		$('.cart_quantity').each(function(i,q) {
+			quantity += parseInt($(q).val());
+		})
+		$('.cart_weight').each(function(i,w) {
+			weight += parseFloat($(w).val());
+		})
+		$('.cart_volume_weight').each(function(i,v) {
+			volume_weight += parseFloat($(v).val());
+		})
+		$.each(option, function (index, value) {
+			const billing_method = value.billing_method;
+			const arrival_day = value.arrival_day;
+			const type_content = value.type_content;
+			let disabled = '';
+			if (parseInt(billing_method)===2){
+				//首续重
+				const f_weight = type_content.first_heavy
+				const c_weight = type_content.continued_heavy
+				if ((weight-f_weight) > c_weight){
+					disabled = ' disabled ';
+				}
+			}
+			if (parseInt(billing_method)===4){
+				//数量计费
+				const purchase_max = type_content.purchase_max;
+				if (quantity > purchase_max){
+					disabled = ' disabled ';
+				}
+			}
+
+			const html = '' +
+				'<li class="wc_payment_method payment_method_bacs payment_mode" title="It is expected to arrive in '+(arrival_day??30)+' days">' +
+				'<input id="payment_method_' + value.id + '" type="radio" class="input-radio shipping_mode" name="shipping_mode" ' + disabled +
+				'data-location="' + country + '" data-billing_method="' + billing_method + '" ' + ' data-type_content=\'' + JSON.stringify(type_content) + '\' ' + ' value="' + value.id + '" ' + '>' +
+				'<label for="payment_method_' + value.id + '"> &nbsp&nbsp' + value.name + '</label>' +
+				'</li>';
+
+			$('.shipping_methods').append(html);
+		});
+		$('.uclassic-checkout-payment').show();
+
+		// 获取省市区
+		$.ajax({
+			url: areas_url+"?model=states&pid=" + country+"&sid=" + shipping_id,
+			type: 'get',
+			dataType: 'json',
+			success: function(data) {
+				for (let a = 0; a <= data.length - 1; a++) {
+					const objProvince = data[a];
+					province += '<option value="' + objProvince.id + '" id="' + objProvince.id + '">' + objProvince.name + '</option>';
+				}
+				$("#province").html(province)
+			}
+		})
+	})
+
+	$("#province").on('change',function() {
+		let city = '<option selected disabled value="">Select City</option>';
+		$("#city").html(city)
+
+		const areas_url = $('#areas_url').val();
+		const shipping_id = $('#shipping_id').val();
+		const province_id = $('#province').val();
+		$.ajax({
+			url: areas_url+"?model=cities&pid=" + province_id+"&sid=" + shipping_id,
+			type: 'get',
+			dataType: 'json',
+			success: function(data) {
+				for (let a = 0; a <= data.length - 1; a++) {
+					const objCity = data[a];
+					city += '<option value="' + objCity.id + '" id="' + objCity.id + '">' + objCity.name + '</option>';
+				}
+				$("#city").html(city)
+			}
+		})
+	})
+
+	$('.create_account').on('click', function (e) {
+		if ($('.create_account').is(":checked")) {
+			$('.password_area').show();
+		} else {
+			$('.password_area').hide();
+		}
+
+	});
+
+	$('.checkout_form').on('submit', function (e) {
+        $('.checkout_submit_btn').attr('disabled','').empty().html(
+            '<div class="spinner-border text-light spinner-border-sm" role="status">' +
+            '   <span class="sr-only">Loading...</span>' +
+            '   <span>&nbsp;&nbsp; Please Wait...</span>' +
+            '</div>'
+        );
+    });
+
+	$(document).on('click', '.shipping_mode', function (e) {
+		let price = 0;let calculate=0;let quantity = 0;let weight = 0;let volume_weight = 0; let shipping = 0;
+		const billing_method = parseInt($(this).data('billing_method'));
+		const type_content = $(this).data('type_content');
+		const total_amount = parseFloat($('#total_amount').val());
+		const mydiscout = my_discount();
+		$('.cart_quantity').each(function(i,q) {
+			if (parseFloat($(q).data('price'))>0) quantity += parseInt($(q).val());
+		})
+		if (quantity<1) quantity=1;
+		$('.cart_weight').each(function(i,w) {
+			weight += parseFloat($(w).val());
+		})
+		if (weight<1) weight=1;
+		$('.cart_volume_weight').each(function(i,v) {
+			volume_weight += parseFloat($(v).val());
+		})
+		if (volume_weight<1) volume_weight=1;
+
+		if (billing_method===1){
+			//按件固定费用
+			if (parseInt(type_content.type)===1){
+				quantity=1; //计为总价计算
+			} else {
+				// 计为单价计算
+			}
+			price = type_content.price;
+			shipping = price * quantity;
+			calculate = total_amount + shipping - mydiscout;
+		} else if (billing_method===2){
+			//首续重
+			const f_weight = parseFloat(type_content.first_heavy)
+			const f_price = parseFloat(type_content.first_heavy_price)
+			const c_weight = parseFloat(type_content.continued_heavy)
+			const c_price = parseFloat(type_content.continued_heavy_price)
+			if (weight<f_weight){
+				shipping = f_price;
+				calculate = total_amount + shipping - mydiscout;
+			} else if ((weight-f_weight) < c_weight){
+				shipping = f_price + c_price * (weight - f_weight);
+				calculate = total_amount + shipping - mydiscout;
+			} else {
+				Sweet('error','The product weight exceeds the rated weight of the logistics method')
+			}
+
+		} else if (billing_method===3){
+			//体积重计费
+			price = type_content.price;
+			shipping = price * volume_weight;
+			calculate = total_amount + shipping - mydiscout;
+		} else if (billing_method===4){
+			//数量计费
+			price = type_content.price;
+			if (type_content.purchase_max) {
+				const pmax = type_content.purchase_max??999;
+				if (quantity < pmax){
+					shipping = price * quantity;
+					calculate = total_amount + shipping - mydiscout;
+				} else {
+					Sweet('error','The purchase quantity exceeds the rated quantity of the logistics method')
+				}
+			} else {
+				shipping = price * quantity;
+				calculate = total_amount + shipping - mydiscout;
+			}
+		} else {
+			//包邮
+			shipping = 0.00;
+			calculate = total_amount - mydiscout;
+		}
+
+		$('#shipping_charge').attr('data-shipping',shipping).html(amount_format(shipping));
+		$('#shipping_quantity').html('x'+parseInt(quantity));
+		$('#shipping_fee').val(shipping);
+		$('#cart_quantity').val(parseInt(quantity));
+		$('#cart_weight').val(parseFloat(weight));
+		$('#cart_volume_weight').val(parseFloat(volume_weight));
+
+		$('.shipping_charge').show();
+		$('#cart-amount').html(amount_format(calculate));
+
+	});
+
+	// 确认礼品卡
+	$('#customer_gift_card').on('change', function(){
+		let option = $("#customer_gift_card option:selected")
+		let code = option.data('code');
+		if(!code){
+			$('#customer_gift_card').focus()
+			return false
+		}
+		apply_discount({'type':'giftcard','code':code});
+	});
+
+	// 确认优惠券
+	$('#customer_coupon').on('change', function(){
+		let option = $("#customer_coupon option:selected")
+		let code = option.data('code');
+		if(!code){
+			$('#customer_coupon').focus()
+			return false
+		}
+		apply_discount({'type':'coupon','code':code});
+	});
+
+	// 确认折扣码
+	$('#confirm_discount_code').on("click",function(){
+		let code = $('#discount_code').val()
+		let shipping = 0;
+		if(typeof $('#shipping_charge').data('shipping')!=='undefined'){
+			shipping = parseFloat($('#shipping_charge').data('shipping'));
+		}
+		if(!code){
+			$('#discount_code').focus()
+			return false
+		}
+		apply_discount({'type':'discount','shipping':shipping,'code':code});
+	});
+
+})(jQuery);

@@ -1,9 +1,109 @@
-@extends('$LOWER_NAME$::layouts.master')
+@extends(front_view('layouts.app'))
 
 @section('content')
-    <h1>Hello World</h1>
+	@php
+		$customer_local = \Mcamara\LaravelLocalization\Facades\LaravelLocalization::getCurrentLocale();
+	@endphp
+	<!--=====================================
+                BANNER PART START
+    =======================================-->
+	<section class="banner-part">
+		<div class="container">
+			<div class="row">
+				
+				<div class="col-md-2 col-lg-2">
+					<div class="banner-cate active">
+						<div class="cate-heading">
+							<i class="fas fa-bars"></i>
+							<h4>{{ __('TOP CAT') }}</h4>
+						</div>
+						{{ MenuShop() }}
+					</div>
+				</div>
+				
+				{{ ShopSlider('banner') }}
+			
+			</div>
+		</div>
+	</section>
+	<!--=====================================
+				BANNER PART END
+	=======================================-->
+	
+	
+	<!--=====================================
+				OFFER PART START
+	=======================================-->
+	<div class="offer-part">
+		<div class="container">
+			{{ ShopSlider('offer') }}
+		</div>
+	</div>
+	<!--=====================================
+				OFFER PART END
+	=======================================-->
+	
+	
+	<!--=====================================
+				TRENDING PART START
+	=======================================-->
+	{{ProductPart(['type'=>'get_trending_products','id'=>'trending_product_area','class'=>'trend-part','heading'=>__('Trending products'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>null])}}
+	<!--=====================================
+				TRENDING PART END
+	=======================================-->
+	
+	
+	<!--=====================================
+				OFFER ABLE PART START
+	=======================================-->
+	{{ProductPart(['type'=>'get_offerable_products','id'=>'offerable_products_area','class'=>'offerable-part','heading'=>__('Avaible Offer'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>null])}}
+	<!--=====================================
+				OFFER ABLE PART END
+	=======================================-->
+	
+	
+	
+	<!--=====================================
+				BEST SELL PART START
+	=======================================-->
+	{{ProductPart(['type'=>'get_best_selling_product','id'=>'bast_selling_product_area','class'=>'best-part','heading'=>__('Best selling products'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>null])}}
+	<!--=====================================
+				BEST SELL PART END
+	=======================================-->
+	
+	
+	<!--=====================================
+				NEW PART START
+	=======================================-->
+	{{ProductPart(['type'=>'get_latest_products','id'=>'latest_product_area','class'=>'latest-part','heading'=>__('New arrival products'),'more_url'=>url('/shop'),'more_text'=>__('view all'),'related_id'=>null])}}
+	<!--=====================================
+				  NEW PART END
+	=======================================-->
+	
+	@plugin('CMS')
+	<!--=====================================
+				  SHOW PART START
+	=======================================-->
+	{{ shows_card('in_home') }}
+	<!--=====================================
+				  SHOW PART END
+	=======================================-->
+	@endplugin
+	
+	<!--=====================================
+				  ADD PART START
+	=======================================-->
+	<div class="add-part">
+		<div class="container">
+			{{ ShopSlider('ads') }}
+		</div>
+	</div>
+	<!--=====================================
+				  ADD PART END
+	=======================================-->
 
-    <p>
-        This view is loaded from theme: {!! config('$LOWER_NAME$.name') !!}
-    </p>
 @endsection
+@push('js')
+	<script src="{{ front_asset('js/index.js?v='.time())}}"></script>
+	<script src="{{ front_asset('js/video.js') }}"></script>
+@endpush

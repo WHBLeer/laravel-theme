@@ -1,0 +1,171 @@
+@extends(front_view('layouts.app'),['header'=>__('Cart'),'breadcrumbs'=>[['url'=>null,'title'=>__('Cart')]]])
+@push('css')
+	<link rel="stylesheet" type="text/css" href="{{ front_asset('css/cart.css') }}">
+@endpush
+@section('content')
+	@if(Cart::instance(session('cart_key'))->count()==0)
+		<div class="container padding-bottom-3x mb-2 mt-5">
+			<div class="card text-center">
+				<div class="card-body padding-top-2x">
+					<h3 class="card-title">{{ __('Your shopping cart is empty') }}</h3>
+					<p class="card-text">{{ __('You can browse the products and add them to the shopping cart before you checkout.') }}</p>
+					<div class="padding-top-1x padding-bottom-1x"><a class="btn btn-inline"
+																	 href="{{ url('/shop') }}">{{ __('Go Back Shopping') }}</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	@else
+		<main class="site-main main-container no-sidebar">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-9">
+						<div class="main-content">
+							<div class="page-main-content">
+								<div class="uclassic">
+									<div class="uclassic-notices-wrapper"></div>
+									<div class="uclassic-cart-form">
+										<div class="table-responsive">
+											<table
+													class="shop_table shop_table_responsive cart uclassic-cart-form__contents"
+													cellspacing="0">
+												<thead>
+												<tr>
+													<th class="product-thumbnail text-left"><i class="fa fa-image"></i>
+													</th>
+													<th class="product-name">{{ __('Product') }}</th>
+													<th class="product-name">{{ __('Variation') }}</th>
+													<th class="product-name">{{ __('Option') }}</th>
+													<th class="product-name">{{ __('Price') }}</th>
+													<th class="product-quantity">{{ __('Qty') }}</th>
+													<th class="product-subtotal">{{ __('Total') }}</th>
+													<th class="product-remove"></th>
+												</tr>
+												</thead>
+												<tbody>
+												@foreach (Cart::instance(session('cart_key'))->content() as $row)
+													<tr class="uclassic-cart-form__cart-item cart_item">
+														<td class="product-thumbnail">
+															<a href="{{ url($row->options->detail_url) }}"
+															   style="padding: 8px 1px 0;">
+																<div class="table-thumbnail">
+																	@if($row->options->preview_type=='video')
+																		<video src="{{ asset($row->options->preview) }}"
+																			   class="result"></video>
+																	@else
+																		<img src="{{ asset($row->options->preview) }}"
+																			 alt="{{ $row->name }}" class="result">
+																	@endif
+																</div>
+															</a>
+														</td>
+														<td class="product-name" data-title="Product">
+															<a href="{{ url($row->options->detail_url) }}">{{ $row->name }}</a>
+														</td>
+														<td>
+															@if(!$row->options->attributes)
+																<p>--</p>
+															@else
+																@foreach ($row->options->attributes as $variation)
+																	<p>
+																		<b>{{ $variation['parent']['name'] }}</b>
+																		:{{ $variation['name'] }}
+																	</p>
+																@endforeach
+															@endif
+														</td>
+														<td>
+															@if($row->price==0)
+																<p>{{ __('Giveaway') }}</p>
+															@else
+																@foreach ($row->options->options as $option)
+																	<p>
+																		<b>{{ $option['parent']['name'] }}</b>
+																		:{{ $option['name'] }}
+																	</p>
+																@endforeach
+															@endif
+														</td>
+														<td><b>{{ amount_format_fe($row->price) }}</b></td>
+														<td class="text-center">{{ $row->qty }}</td>
+														<td class="product-subtotal" data-title="Total">
+															<span class="uclassic-Price-amount amount">{{ amount_format_fe($row->price * $row->qty) }}</span>
+														</td>
+														<td class="product-remove">
+															<a href="javascript:void(0)"
+															   onclick="cart_remove('{{ $row->rowId }}','cart')"
+															   class="remove">
+																<i class="fas fa-times"></i>
+															</a>
+														</td>
+													</tr>
+												@endforeach
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="col-sm-3" id="cart_total_box">
+						<div class="cart-collaterals">
+							<div class="cart_totals ">
+								<h2 class="text-center">{{ __('Cart totals') }}</h2>
+								<table class="shop_table shop_table_responsive" cellspacing="0">
+									<tbody>
+									<tr class="cart-subtotal">
+										<th>{{ __('Price Total') }}</th>
+										<td data-title="PriceTotal">
+                                        <span
+												class="uclassic-price-amount amount">{{ amount_format_fe(Cart::instance(session('cart_key'))->priceTotal()) }}</span>
+										</td>
+									</tr>
+									<tr class="cart-subtotal">
+										<th>{{ __('Tax') }}</th>
+										<td data-title="Tax">
+                                <span class="uclassic-price-amount amount">
+                                    {{ amount_format_fe(Cart::instance(session('cart_key'))->tax()) }}
+                                </span>
+										</td>
+									</tr>
+									<tr class="cart-subtotal">
+										<th>{{ __('Subtotal') }}</th>
+										<td data-title="Subtotal">
+                                <span class="uclassic-price-amount amount">
+                                    <span
+											id="cart-subtotal">{{ amount_format_fe(Cart::instance(session('cart_key'))->total()) }}</span>
+                                </span>
+										</td>
+									</tr>
+									<tr class="order-total">
+										<th>{{ __('Total') }}</th>
+										<td data-title="Total">
+											<strong>
+                                    <span class="uclassic-price-amount amount text-dark">
+                                        <span
+												id="cart-amount">{{ amount_format_fe(Cart::instance(session('cart_key'))->total()) }}</span>
+                                    </span>
+											</strong>
+										</td>
+									</tr>
+									</tbody>
+								</table>
+								<div class="uclassic-proceed-to-checkout">
+									<a href="{{ url('/checkout') }}"
+									   class="checkout-button button alt uclassic-forward">{{ __('Proceed to checkout') }}</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+		<div id="currency_standard" style="display: none">{{ amount_format_fe(1) }}</div>
+	@endif
+@endsection
+@push('js')
+	<script type="text/javascript" src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
+	<script type="text/javascript" src="{{ asset('assets/common/ajax-form.js') }}"></script>
+@endpush

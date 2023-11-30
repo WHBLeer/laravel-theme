@@ -462,7 +462,7 @@ class ThemeGenerator implements GeneratorInterface
     }
 
     /**
-     * Get replacement for $THEME_NAMESPACE$.
+     * Get replacement for $PLUGIN_NAMESPACE$.
      *
      * @return string
      */

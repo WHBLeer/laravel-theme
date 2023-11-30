@@ -2,7 +2,10 @@
 
 namespace Sanlilin\LaravelTheme\Providers;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Sanlilin\LaravelTheme\Providers\MenuServiceProvider;
+use Sanlilin\LaravelTheme\Providers\RouteServiceProvider;
 use Sanlilin\LaravelTheme\Contracts\ActivatorInterface;
 use Sanlilin\LaravelTheme\Contracts\ClientInterface;
 use Sanlilin\LaravelTheme\Contracts\RepositoryInterface;
@@ -19,6 +22,8 @@ class ThemeServiceProvider extends ServiceProvider
     {
         $this->registerThemes();
         $this->registerPublishing();
+	    $this->registerViews();
+	    $this->app->register(MenuServiceProvider::class);
     }
 
     /**
@@ -31,6 +36,9 @@ class ThemeServiceProvider extends ServiceProvider
         $this->registerServices();
         $this->setupStubPath();
         $this->registerProviders();
+		$this->registerBlade();
+	    $this->app->register(RouteServiceProvider::class);
+	    
     }
 
     /**
@@ -108,6 +116,39 @@ class ThemeServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
     }
 
+	/**
+	 * Register views.
+	 *
+	 * @return void
+	 */
+	public function registerViews()
+	{
+		$sourcePath = __DIR__.'/../../resources/views';
+		$this->loadViewsFrom($sourcePath,'laravel-theme');
+
+		if ($this->app->runningInConsole()) {
+			$viewPath = resource_path('views/vendor/laravel-theme');
+
+			$this->publishes([
+				$sourcePath => $viewPath
+			], 'laravel-theme-views');
+		}
+	}
+	
+	/**
+	 * Register blade.
+	 *
+	 * @return void
+	 */
+	public function registerBlade()
+	{
+		Blade::if('theme', function ($expression) {
+			$theme = $this->app['themes.repository']->findOrFail($expression);
+			return $theme && $theme->isEnabled();
+		});
+
+	}
+
     /**
      * Get the services provided by the provider.
      *
@@ -124,11 +165,11 @@ class ThemeServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../../config/config.php' => config_path('themes.php'),
             ], 'laravel-theme-config');
-            $this->publishes([
-                __DIR__.'/../../resources/lang' => resource_path('lang'),
-            ], 'laravel-theme-lang');
+
+	        $this->loadJsonTranslationsFrom(__DIR__.'/../../resources/lang');
 
             $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
+
         }
     }
 }

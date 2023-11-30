@@ -1,0 +1,405 @@
+(function($) {
+	"use strict";
+	const base_url = $('#base_url').val();
+	const product_id = parseInt($('#term').val());
+
+	detail_products_data();
+	// 产品评论
+	if (show_review) {
+		product_review(base_url + '/get_product_reviews/' + product_id);
+	}
+
+	// 属性变化处理
+	$('.cart-form-item').on('click',function(){
+		if($(this).hasClass('appreciation') && $(this).hasClass('active')) {
+			//已选的去掉选择,仅增值属性
+			$(this).removeClass('active');
+			$(this).find('input:checked').removeAttr('checked');
+		}
+
+		if ($('.submit_btn').attr('disabled') == undefined) {
+			$('.submit_btn').html('Add to Cart').removeAttr('disabled');
+		}
+		const href = detail_filter_params();
+		if (href) window.location.replace(href);
+	});
+
+	$(".cart-form").on('submit', function(e) {
+		e.preventDefault();
+		//判断属性必选
+		let required=0;
+		$('.req:checked').each(function (key, elem) {
+			if(!elem.checked){
+				required++;
+			}
+		});
+		if(required>0){
+			$('.required_option').show();
+		} else{
+			$('.required_option').hide();
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				}
+			});
+			$.ajax({
+				type: 'POST',
+				url: this.action,
+				data: new FormData(this),
+				dataType: 'json',
+				contentType: false,
+				cache: false,
+				processData: false,
+				beforeSend: function() {
+					$('.submit_btn').html('Please wait...').attr('disabled', '');
+				},
+				success: function(response) {
+					$('.submit_btn').html("Cart Added");
+					Sweet('success','Cart Added')
+					render_cart(response)
+				}
+			})
+		}
+	});
+
+	$("#wishlist").on('click', function(e) {
+        const _this = $(this);
+		const id = _this.data('id');
+        const is_active = _this.hasClass('active');
+        const btn_content = _this.html();
+        let url = base_url+'/wishlist/add';
+        if (is_active) url = base_url+'/wishlist/remove';
+		e.preventDefault();
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'post',
+			url: url,
+			data:{"id":id},
+			dataType: 'json',
+			beforeSend: function() {
+				let load_dom = [];
+				load_dom.push('<div class="spinner-border spinner-border-sm text-danger" role="status">');
+				load_dom.push('		<span class="sr-only">Loading...</span>');
+				load_dom.push('</div>');
+                _this.html(load_dom.join('\n')).attr('disabled', '');
+			},
+			success: function(response){
+                if (response == -1) {
+                    //导航到登录
+                    window.location.href = base_url + '/user/login/';
+                }
+                $('.wishlist_count').html(response)
+                if (is_active) {
+                    _this.html(btn_content).removeClass('active');
+                    $('.heart').removeClass('active');
+                    Sweet('success', 'Remove success from your wish list');
+                } else {
+                    _this.html(btn_content).addClass('active');
+                    $('.heart').addClass('active');
+                    Sweet('success', 'Successfully added to wish list');
+                }
+			}
+		});
+	});
+
+	$(".review-form").on('submit', function(e) {
+		var btn_content = $('.review_btn').html();
+		e.preventDefault();
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: this.action,
+			data: new FormData(this),
+			dataType: 'json',
+			contentType: false,
+			cache: false,
+			processData: false,
+			beforeSend: function() {
+				$('.review_btn').attr('disabled', '');
+				$('.review_btn').html('Please wait...');
+			},
+			success: function(response) {
+				$('.review_btn').removeAttr('disabled');
+				$('.review_btn').html(btn_content);
+				Sweet('success',response);
+				$('.review-form').trigger('reset');
+				product_review(base_url + '/get_product_reviews/' + product_id);
+			},
+			error: function(xhr, status, error) {
+				$('.review_btn').removeAttr('disabled');
+				$('.review_btn').html(btn_content);
+				if (xhr.responseJSON.message) {
+					Sweet('error',xhr.responseJSON.message);
+				} else {
+					$.each(xhr.responseJSON.errors, function (key, item) {
+						Sweet('error',item)
+					});
+				}
+			}
+		})
+	});
+
+
+	//数量变更
+	$('#qty').on('change',function(){
+		const qty_val = parseInt($('#qty').val());
+		if($('.first_attr').is(':checked')){
+			const stockmanage = parseInt($('.first_attr').data('stockmanage'));
+			const max_qty = $('#max_qty').val();
+			if(stockmanage === 1){
+				if(qty_val >= max_qty){
+					$('#qty').val(max_qty);
+				}
+			}
+			if(qty_val <= 0){
+				$('#qty').val(1);
+			}
+		}
+	});
+
+	$('.sidebar li').click(function () {
+		$(this).addClass('active').siblings().removeClass('active')
+	});
+
+	// 展开
+	$('.open').click(function (event) {
+		$(this).addClass('heid').removeClass('block').next().addClass('block').removeClass('heid')
+		$(this).siblings('.answer').addClass('block').removeClass('heid')
+		event.stopPropagation();
+
+	});
+	//点标题收齐展开
+	$('.main_right_item').click(function () {
+        if($(this).children().siblings('.open').attr('class').trim() =='open heid'){
+            $(this).children().siblings('.answer').removeClass('block').addClass('heid')
+            $(this).children().siblings('.open').addClass('block').removeClass('heid')
+            $(this).children().siblings('.Stow').removeClass('block')
+        }else{
+            $(this).children().siblings('.answer').addClass('block').removeClass('heid')
+            $(this).children().siblings('.open').addClass('heid').removeClass('block')
+            $(this).children().siblings('.Stow').addClass('block').removeClass('heid')
+        }
+    });
+	// 收起
+	$('.Stow').click(function (event) {
+		$(this).removeClass('block').prev().addClass('block').removeClass('heid')
+		$(this).siblings('.answer').addClass('heid').removeClass('block')
+		event.stopPropagation();
+	});
+	//<!--B2B询盘按钮-->
+	$('.enquiriesClick').click(function(){
+		$('#figure-madol').show();
+		// 页面禁止滚动
+		$('body').css({
+        　　"overflow-x":"hidden",
+        　　"overflow-y":"hidden"
+        });
+		$('img #captcha').click();
+	});
+	$('.imgTextList_box>div').click(function () { //选项卡
+		$('#manager_id').val($(this).data('value'));
+		$(this).find(".gouIcon").addClass("acitve").parents("div").siblings().find(".gouIcon").removeClass("acitve")
+		$(".box_content").eq($(this).index()).addClass("acitve").siblings().removeClass("acitve")
+	});
+
+	$("#attach_file").change(function () {
+		let uploadFile = $("#attach_file")[0].files[0];
+		const max_size = 2*1024*1024;//限制最大上传大小
+		if (max_size<uploadFile.size) {
+			Sweet('error','A maximum of 2MB files can be uploaded')
+			return false;
+		}
+		console.log(uploadFile);
+		$('#attach_file_progress').show();
+		$('#attach_file_view').show();
+		$("#attach_file_view").empty().append('<p>'+uploadFile.name+'</p>')
+		let progress_bar = $('#attach_file_progress .progress-bar');
+		//创建文件读取对象
+		let reader = new FileReader();
+		reader.readAsDataURL(uploadFile);
+		//开始读取文件
+		reader.onloadstart = function(e){
+			progress_bar.attr('data-width','0%').attr('aria-valuenow',0).css({width: '0%'}).text('0%');
+		}
+		//文件读取进度
+		reader.onprogress = function(e){
+			const p = Math.round(e.loaded / e.total * 100);
+			progress_bar.attr('data-width',p+'%').attr('aria-valuenow',p).css({width: p+'%'}).text(p+'%');
+		}
+		//文件读取完毕
+		reader.onload = function(){
+			progress_bar.attr('data-width','100%').attr('aria-valuenow',100).css({width: '100%'}).text('100%').addClass('bg-success');
+			setTimeout(function(){
+				$('#attach_file_progress').hide();
+				progress_bar.attr('data-width','0%').attr('aria-valuenow',0).css({width: '0%'}).text('0%').removeClass('bg-success');
+			}, 1500);
+		}
+	});
+	const initPhotoSwipeFromDOM = function(gallerySelector) {
+		const openPhotoSwipe = function(index, galleryElement, disableAnimation, fromURL) {
+			let pswpElement = document.querySelectorAll('.pswp')[0],
+				gallery,
+				options,
+				items;
+			items = parseThumbnailElements(galleryElement);
+			// 这里可以定义参数
+			options = {
+				barsSize: {
+					top: 100,
+					bottom: 100,
+				},
+				fullscreenEl: false,
+				galleryUID: galleryElement.getAttribute('data-pswp-uid'),
+				getThumbBoundsFn: function(index) {
+					const thumbnail = items[index].el.getElementsByTagName('img')[0], // find thumbnail
+						pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
+						rect = thumbnail.getBoundingClientRect();
+					return {x: rect.left, y: rect.top + pageYScroll, w: rect.width};
+				},
+			};
+			if (fromURL) {
+				if (options.galleryPIDs) {
+					for (let j = 0; j < items.length; j++) {
+						if (items[j].pid == index) {
+							options.index = j;
+							break;
+						}
+					}
+				} else {
+					options.index = parseInt(index, 10) - 1;
+				}
+			} else {
+				options.index = parseInt(index, 10);
+			}
+			if (isNaN(options.index)) {
+				return;
+			}
+			if (disableAnimation) {
+				options.showAnimationDuration = 0;
+			}
+			gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+			gallery.init();
+		};
+		// 解析来自DOM元素幻灯片数据（URL，标题，大小...）
+		const parseThumbnailElements = function(el) {
+			let thumbElements = el.childNodes,
+				numNodes = thumbElements.length,
+				items = [],
+				figureEl,
+				linkEl,
+				size,
+				item,
+				divEl;
+			for (var i = 0; i < numNodes; i++) {
+				figureEl = thumbElements[i]; // <figure> element
+				// 仅包括元素节点
+				if (figureEl.nodeType !== 1) {
+					continue;
+				}
+				divEl = figureEl.children[0];
+				linkEl = divEl.children[0]; // <a> element
+				linkEl.getAttribute('data-size') ? size = linkEl.getAttribute('data-size').split('x') : size = ['1600', '1600'];
+				// 创建幻灯片对象
+				item = {
+					src: linkEl.getAttribute('href'),
+					w: parseInt(size[0], 10),
+					h: parseInt(size[1], 10),
+				};
+				if (figureEl.children.length > 1) {
+					item.title = figureEl.children[1].innerHTML;
+				}
+				if (linkEl.children.length > 0) {
+					// <img> 缩略图节点, 检索缩略图网址
+					item.msrc = linkEl.children[0].getAttribute('src');
+				}
+				item.el = figureEl; // 保存链接元素 for getThumbBoundsFn
+				items.push(item);
+			}
+			return items;
+		};
+
+		// 查找最近的父节点
+		const closest = function closest(el, fn) {
+			return el && (fn(el) ? el : closest(el.parentNode, fn));
+		};
+
+		// 当用户点击缩略图触发
+		const onThumbnailsClick = function(e) {
+			if (e.target.id == 'bagimg' || e.target.id == 'videos' || e.target.tagName == 'IMG') {
+				return false;
+			}
+			e = e || window.event;
+			e.preventDefault ? e.preventDefault() : e.returnValue = false;
+			const eTarget = e.target || e.srcElement;
+			const clickedListItem = closest(eTarget, function(el) {
+				return (el.tagName && el.tagName.toUpperCase() === 'FIGURE');
+			});
+			if (!clickedListItem) {
+				return;
+			}
+			let clickedGallery = clickedListItem.parentNode,
+				childNodes = clickedListItem.parentNode.childNodes,
+				numChildNodes = childNodes.length,
+				nodeIndex = 0,
+				index;
+			for (let i = 0; i < numChildNodes; i++) {
+				if (childNodes[i].nodeType !== 1) {
+					continue;
+				}
+				if (childNodes[i] === clickedListItem) {
+					index = nodeIndex;
+					break;
+				}
+				nodeIndex++;
+			}
+			if (index >= 0) {
+				openPhotoSwipe(index, clickedGallery);
+			}
+			return false;
+		};
+
+		const photoswipeParseHash = function() {
+			const hash = window.location.hash.substring(1),
+				params = {};
+			if (hash.length < 5) {
+				return params;
+			}
+			const vars = hash.split('&');
+			for (let i = 0; i < vars.length; i++) {
+				if (!vars[i]) {
+					continue;
+				}
+				const pair = vars[i].split('=');
+				if (pair.length < 2) {
+					continue;
+				}
+				params[pair[0]] = pair[1];
+			}
+			if (params.gid) {
+				params.gid = parseInt(params.gid, 10);
+			}
+			return params;
+		};
+
+
+		const galleryElements = document.querySelectorAll(gallerySelector);
+		for (let i = 0, l = galleryElements.length; i < l; i++) {
+			galleryElements[i].setAttribute('data-pswp-uid', i + 1);
+			galleryElements[i].onclick = onThumbnailsClick;
+		}
+		const hashData = photoswipeParseHash();
+		if (hashData.pid && hashData.gid) {
+			openPhotoSwipe(hashData.pid, galleryElements[hashData.gid - 1], true, true);
+		}
+	};
+
+	initPhotoSwipeFromDOM('.my-gallery');
+})(jQuery);

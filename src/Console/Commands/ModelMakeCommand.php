@@ -118,9 +118,10 @@ class ModelMakeCommand extends GeneratorCommand
             'NAMESPACE'         => $this->getClassNamespace($theme),
             'CLASS'             => $this->getClass(),
             'LOWER_NAME'        => $theme->getLowerName(),
-            'THEME'            => $this->getThemeName(),
+	        'UPPER_NAME'        => $theme->getUpperName(),
+            'PLUGIN'            => $this->getThemeName(),
             'STUDLY_NAME'       => $theme->getStudlyName(),
-            'THEME_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
+            'PLUGIN_NAMESPACE'  => $this->laravel['themes.repository']->config('namespace'),
         ]))->render();
     }
 

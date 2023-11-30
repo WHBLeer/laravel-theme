@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('install_themes', function (Blueprint $table) {
-            $table->id();
+	        $table->bigIncrements('id');
             $table->string('name')->default('');
             $table->string('alias')->default('');
             $table->string('description')->default('');
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('status')->default(0);
             $table->string('version')->default('');
             $table->string('logo')->default('');
+	        $table->json('author')->nullable();
             $table->json('composer')->nullable();
             $table->timestamps();
         });
@@ -37,4 +38,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('install_themes');
     }
-}
+};

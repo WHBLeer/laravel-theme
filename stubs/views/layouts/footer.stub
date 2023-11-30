@@ -1,0 +1,55 @@
+@php $currency = currency_info(); @endphp
+<footer class="footer-part">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-lg-4">
+				<div class="footer-about">
+					<a href="{{ site_url('/') }}"><img
+								src="{{ asset('logo.'.options('logo_suffix', 'png')) }}" alt=""></a>
+					<p>{{ options('shop_description') }}</p>
+					<ul class="round-icon footer-icon">
+						@foreach(options('socials') as $key => $value)
+							<li><a href="{{ url($value->url) }}" target="_blank"><i class="{{ $value->icon }}"></i></a>
+							</li>
+						@endforeach
+					</ul>
+				</div>
+			</div>
+			<div class="col-md-6 col-lg-3">
+				{{ MenuFooter('left') }}
+			</div>
+			<div class="col-md-6 col-lg-3">
+				{{ MenuFooter('center') }}
+			</div>
+			<div class="col-md-6 col-lg-2">
+				{{ MenuFooter('right') }}
+			</div>
+		</div>
+	</div>
+	<div class="footer-bottom text-center">
+		<div class="container ">
+			<div class="row text-center">
+				<p>
+					{{ __('Copyright') }} &copy; {{ date('Y') }}. {{ __('All rights reserved by') }} <a
+							href="{{ site_url('/') }}">{{ options('app_name',env('APP_NAME')) }}</a> {{ __('Powered by') }}
+					<a
+							href="https://www.iroboup.com" target="_blank">{{ env('APP_NAME') }}</a>
+				</p>
+			</div>
+		
+		</div>
+	</div>
+</footer>
+<button id="back-to-top" class="btn btn-primary" title="Back to Top"
+		style="position: fixed;bottom: 70px;right: 20px;padding: 17px 20px;background-color: var(--main-theme-color);">
+	<i class="fa fa-chevron-up"></i>
+</button>
+<input type="hidden" id="currency_position" value="{{ $currency['position'] }}">
+<input type="hidden" id="currency_name" value="{{ $currency['name'] }}">
+<input type="hidden" id="currency_code" value="{{ $currency['code'] }}">
+<input type="hidden" id="currency_icon" value="{{ $currency['icon'] }}">
+<input type="hidden" id="currency_rate" value="{{ $currency['rate'] }}">
+<input type="hidden" id="preloader" value="{{ asset('uploads/preload.webp') }}">
+<input type="hidden" id="base_url" value="{{ site_url('/') }}">
+<input type="hidden" id="theme_color" value="{{ options('theme_color','#006ceb') }}">
+<input type="hidden" id="captcha_src" value="{{ captcha_src() }}">

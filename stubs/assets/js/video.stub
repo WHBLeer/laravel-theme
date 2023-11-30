@@ -1,0 +1,14 @@
+(function ($) {
+    $('.product-card').on('mouseenter',function(){
+        const playvideo = $(this).children().siblings('.product-img').children('video').length
+        if(playvideo){
+            $(this).children().siblings('.product-img').children('video').get(0).play()
+        }
+    });
+    $('.product-card').on('mouseleave',function(){
+        const pausevideo = $(this).children().siblings('.product-img').children('video').length
+        if(pausevideo){
+            $(this).children().siblings('.product-img').children('video').get(0).pause()
+        }
+    });
+})(jQuery);

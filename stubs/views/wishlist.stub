@@ -1,0 +1,116 @@
+@extends(front_view('layouts.app'),['header'=>__('Wishlist'),'breadcrumbs'=>[['url'=>null,'title'=>__('Wishlist')]]])
+@section('content')
+    @if(count($wishlists)==0)
+        <div class="container padding-bottom-3x mb-2 mt-5">
+            <div class="card text-center">
+                <div class="card-body padding-top-2x">
+                    <h3 class="card-title">{{ __('Your wishlist is empty') }}</h3>
+                    <p class="card-text">{{ __('You can browse the products and add them to the wishlist.') }}</p>
+                    <div class="padding-top-1x padding-bottom-1x">
+                        <a class="btn btn-inline" href="{{ url('/shop') }}">{{ __('Go Back Shopping') }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
+        <main class="site-main main-container no-sidebar">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        @if (!customer_check())
+                            @plugin('UCenter')
+                            <div class="uclassic_notice">
+                                <p>
+                                    {{ __('Are you a frequenter?') }}
+                                    <a href="{{u_login()}}">{{ __('Click here to login') }}</a>
+                                </p>
+                            </div>
+                            @endplugin
+                        @endif
+                        @foreach ($wishlists as $row)
+                            @php
+                                $item = $row['options'];
+                                if (count($item['categories']) > 0) {
+                                    $category_arr = [];
+                                    foreach ($item['categories'] as $cate) {
+                                        $category_arr[] = $cate['name'];
+                                    }
+                                    $category = implode('|',$category_arr);
+                                } else{
+                                    $category = '';
+                                }
+                            @endphp
+                            
+                            <div class="product-card dynamic-elements">
+                                <div class="product-img">
+                                    @if($item['album_type']=='video')
+                                        <video src="{{ $item['album'] }}" controlslist="nofullscreen" muted
+                                               loop="loop"></video>
+                                    @else
+                                        <img src="{{ $item['album'] }}" alt="">
+                                    @endif
+                                    
+                                    @if($item['default_stock']['stock_status'] == 0)
+                                        <span class="new-badge">Stock Out</span>
+                                    @else
+                                        @if($item['featured'] == 1)
+                                            <span class="new-badge">Trending</span>
+                                        @elseif($item['featured'] == 2)
+                                            <span class="new-badge">Best selling</span>
+                                        @endif
+                                    @endif
+                                    <ul class="product-widget">
+                                        <li>
+                                            @if(!(count($item['variants'])>0))
+                                                <a href="javascript:void(0)" onclick="cart_add({{ $item['id'] }})"
+                                                   class="cart_{{ $item['id'] }}">
+                                                    <i class="fas fa-shopping-basket"></i>
+                                                </a>
+                                            @else
+                                                <a href="{{ $item['detail_url'] }}"><i
+                                                            class="fas fa-shopping-basket"></i></a>
+                                            @endif
+                                        </li>
+                                        <li><a href="{{ $item['detail_url'] }}"><i class="fas fa-search"></i></a></li>
+                                        <li><a class="wishlist_{{ $item['id'] }}"
+                                               onclick="wishlist_add({{ $item['id'] }})"><i
+                                                        class="fas fa-heart"></i></a></li>
+                                    </ul>
+                                </div>
+                                <div class="product-content">
+                                    <div class="product-cate">
+                                        <p>{{ $category }}</p>
+                                    </div>
+                                </div>
+                                <div class="product-name">
+                                    <a href="{{ $item['detail_url'] }}"><h3>{{Str::limit($row['name'],120,'...')}}</h3>
+                                    </a>
+                                </div>
+                                <div class="product-price">
+                                    <p>
+                                        @if ($item['type']=='with')
+                                            @if (in_array($item['default_stock']['derate_type'],[1,2]))
+                                                <del>{{ amount_format_fe($item['default_stock']['special_price']) }}</del>
+                                                {{ amount_format_fe($item['default_stock']['price']) }}
+                                            @else
+                                                {{ amount_format_fe($item['default_stock']['special_price']) }}
+                                            @endif
+                                        @else
+                                            {{ amount_format_fe($item['default_stock']['special_price']) }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </main>
+    @endif
+@endsection
+@push('js')
+    <script src="{{ front_asset('js/jquery-ui.js')}}"></script>
+    <script src="{{ front_asset('js/shop.js')}}"></script>
+    <!-- hover视频播放 -->
+    <script src="{{ front_asset('js/video.js')}}"></script>
+@endpush

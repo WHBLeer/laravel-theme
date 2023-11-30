@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="{{ App::getlocale() }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{$page_title}} - {{env('APP_NAME','ROBOUP')}}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="hb" content="{{ showCurrencySymbol() }}">
+    <meta name="local" content="{{ LaravelLocalization::getCurrentLocale() }}">
+    <link rel="icon" href="{{ url('favicon.ico') }}">
+    <style type="text/css">
+        :root {
+            --main-theme-color: {{ options('theme_color','#006ceb') }};
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap">
+    <link rel="stylesheet" href="{{ front_asset('css/fontawsome/all.min.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/slick.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ front_asset('css/main.css') }}">
+    @stack('css')
+</head>
+<body>
+@include(front_view('layouts.header',false))
+@yield('content')
+@include(front_view('layouts.footer',false))
+@yield('logout')
+<script src="{{ front_asset('js/jquery-3.5.1.min.js') }}"></script>
+<script src="{{ front_asset('js/jquery.unveil.js') }}"></script>
+<script src="{{ front_asset('js/popper.min.js') }}"></script>
+<script src="{{ front_asset('js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ front_asset('js/nicescroll.min.js') }}"></script>
+<script src="{{ asset('assets/common/common.js') }}"></script>
+<script src="{{ front_asset('js/main.js') }}"></script>
+@stack('js')
+</body>
+</html>

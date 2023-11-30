@@ -1,0 +1,10 @@
+<div class="row">
+	<div class="col-sm-4 content-placeholder ads_preload"></div>
+	<div class="col-sm-4 content-placeholder ads_preload"></div>
+	<div class="col-sm-4 content-placeholder ads_preload"></div>
+</div>
+<div class="offer-slider dynamic-elements">
+	@foreach($items as $item)
+		<a href="{{$item['link']}}"><img src="{{ _F($item['advert']['path']) }}" alt="{{$item['alt']}}"></a>
+	@endforeach
+</div>

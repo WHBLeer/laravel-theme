@@ -1,0 +1,112 @@
+@extends(front_view('layouts.app'),['header'=>$info['title'],'breadcrumbs'=>[['url'=>url('/shop'),'title'=>__('Product')],['url'=>null,'title'=>$info['title']]]])
+@push('css')
+@endpush
+@section('content')
+	<section class="single-product">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 col-lg-6">
+					<div class="single-product-slider">
+						@if ($info['preview'])
+							<div>
+								@if(in_array('video',$info['preview']['groups']))
+									<video src="{{ _F($info['preview']['path']) }}" controls="controls" autoplay="autoplay" controlslist="nofullscreen" muted loop="loop" ></video>
+								@else
+									<img src="{{ _F($info['preview']['path']) }}" class="jqzoom" alt="" rel="{{ _F($info['preview']['path']) }}">
+								@endif
+							</div>
+						@endif
+						@foreach ($info['medias'] as $row)
+							<div><img src="{{ _F($row['path']) }}" class="jqzoom" alt="" rel="{{ _F($row['path']) }}"></div>
+						@endforeach
+					</div>
+					@if ($info['preview'] || count($info['medias']) > 1)
+						<div class="single-thumb-slider" id="thumb-slider">
+							@if ($info['preview'])
+								@if(in_array('video',$info['preview']['groups']))
+									<video src="{{ _F($info['preview']['path']) }}" controls="" controlslist="nofullscreen"> </video>
+								@else
+									<img src="{{ _F($info['preview']['path']) }}" alt="" >
+								@endif
+							@endif
+							@foreach ($info['medias'] as $row)
+								<img src="{{ _F($row['path']) }}" alt="">
+							@endforeach
+						</div>
+					@endif
+				</div>
+				<div class="col-md-6 col-lg-6">
+					<div class="single-product-info">
+						<div class="single-product-meta">
+							<div class="single-product-name">
+								<h1 class="producth1title">{{ $info['title'] }}</h1>
+								<p>{{ __('SKU') }}: <span id="sku_area">{{ $info['stock']['sku'] }}</span></p>
+							</div>
+						</div>
+						<div class="single-product-meta">
+							<ul class="single-product-review">
+								@foreach ($defaultData['ratting_avg'] as $item)
+									<li><i class="fas fa-star"></i></li>
+								@endforeach
+								<li><span>({{count($defaultData['ratting_avg'])}}/5)</span></li>
+							</ul>
+						</div>
+
+						<p class="single-product-describe">
+							{{ content($info['excerpt'] ?? '') }}
+						</p>
+						@if (count($info['categories']) > 0)
+							<div class="single-product-widget product-tags">
+								<h5>{{ __('Category') }} :</h5>
+								<ul>
+									@foreach ($info['categories'] as $row)
+										<li><a target="_new" href="{{ $row['detail_url'] }}">{{ $row['name'] }}</a></li>
+									@endforeach
+								</ul>
+							</div>
+						@endif
+						@if (count($info['brands']) > 0)
+							<div class="single-product-widget product-tags">
+								<h5>{{ __('Brand') }} :</h5>
+								<ul>
+									@foreach ($info['brands'] as $row)
+										<li><a target="_new" href="{{ $row['detail_url'] }}">{{ $row['name'] }}</a></li>
+									@endforeach
+								</ul>
+							</div>
+						@endif
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!--=====================================
+						 SINGLE PRODUCT PART END
+				=======================================-->
+
+
+	<!--=====================================
+						  PRODUCT DETAILS START
+				=======================================-->
+	<section class="details-part">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="details-menu">
+						<ul class="nav nav-tabs">
+							<li><a href="#descrip" class="nav-link active" data-toggle="tab">{{ __('Description') }}</a></li>
+						</ul>
+					</div>
+					<div class="tab-pane active" id="descrip">
+						<div class="details-descrip">
+							{{ content($info['content'] ?? '') }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+@endsection
+@push('js')
+	<script src="{{ front_asset('js/imagezoom.js') }}"></script>
+@endpush

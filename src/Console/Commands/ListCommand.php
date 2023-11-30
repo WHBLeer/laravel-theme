@@ -27,7 +27,7 @@ class ListCommand extends Command
      */
     public function handle(): int
     {
-        $this->table([__('themes.name'), __('themes.status'), __('themes.priority'), __('themes.path')], $this->getRows());
+        $this->table([__('theme_name'), __('status'), __('priority'), __('path')], $this->getRows());
 
         return 0;
     }

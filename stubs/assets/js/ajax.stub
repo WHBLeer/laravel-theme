@@ -1,0 +1,160 @@
+(function ($) {
+	"use strict";
+	
+	$("#commentform").on('submit', function(e){
+		e.preventDefault();
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: this.action,
+			data: new FormData(this),
+			dataType: 'json',
+			contentType: false,
+			cache: false,
+			processData:false,
+			beforeSend: function() {
+				$('.sub-btn').html('Hold On');
+				$('.sub-btn').attr('disabled','');
+			},
+			
+			success: function(response){
+				$('.sub-btn').html('Save')
+				$('.sub-btn').removeAttr('disabled')
+				$('#commentform').trigger('reset');
+				Sweet('success','Comment Success')
+				
+				let comment = [];
+				comment.push('<div class="container comment  m-1 p-0" id="comment_'+response.id+'">');
+				comment.push(    '<a class="me-a avatar p-0 m-0">');
+				comment.push(        '<i class="fas fa-user"></i>');
+				comment.push(    '</a>');
+				comment.push(    '<div class=" ml-5 mt-3 border-left border-bottom">');
+				comment.push(        '<div class="container ml-2">');
+				comment.push(            '<a class="author">');
+				comment.push(                '<span>@'+response.name+'</span>');
+				comment.push(                '<span class="summary-text small">'+response.time+'</span>');
+				comment.push(            '</a>');
+				comment.push(        '</div>');
+				comment.push(        '<div class="messageText ml-2 container m-2">'+response.comment+'</div>');
+				comment.push(    '</div>');
+				comment.push('</div>');
+				$('.comments').append(comment.join('\n'));
+			},
+			error: function(xhr, status, error) {
+				$('.sub-btn').html('Save')
+				$('.sub-btn').removeAttr('disabled')
+				$.each(xhr.responseJSON.errors, function (key, item) {
+					Sweet('error',item)
+				});
+			}
+		})
+	});
+	
+	$("#keep_shows").click(function () {
+		const show_id = $('#show_id').val();
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: '/cms/shows_praise',
+			data: JSON.stringify({"show_id":show_id, "type":'keep'}),
+			dataType: 'json',
+			contentType: 'application/json',
+			cache: false,
+			processData:false,
+			success: function(response){
+				Sweet('success',response.message);
+				$("#keep-num").text(response.data);
+				$("#keep_shows").hide();
+			},
+			error: function(xhr, status, error) {
+				$.each(xhr.responseJSON.errors, function (key, item) {
+					Sweet('error',item)
+				});
+			}
+		})
+	});
+	$("#contactform").on('submit', function(e){
+		e.preventDefault();
+		const btn = $('.basicbtn');
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: this.action,
+			data: new FormData(this),
+			dataType: 'json',
+			contentType: false,
+			cache: false,
+			processData:false,
+			beforeSend: function() {
+				btn.attr('disabled','');
+				btn.addClass('btn-progress')
+			},
+			success: function(response){
+				btn.removeAttr('disabled');
+				btn.removeClass('btn-progress');
+				$('#contactform').trigger('reset');
+				Sweet('success',response);
+			},
+			error: function(xhr, status, error) {
+				btn.removeAttr('disabled');
+				btn.removeClass('btn-progress');
+				$.each(xhr.responseJSON.errors, function (key, item) {
+					Sweet('error',item)
+				});
+				//重置验证码
+				$('#captcha').click();
+			}
+		})
+	});
+	$("#enquiryform").on('submit', function(e){
+		e.preventDefault();
+		const btn = $('.basicbtn');
+		$.ajaxSetup({
+			headers: {
+				'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			}
+		});
+		$.ajax({
+			type: 'POST',
+			url: this.action,
+			data: new FormData(this),
+			dataType: 'json',
+			contentType: false,
+			cache: false,
+			processData:false,
+			beforeSend: function() {
+				btn.attr('disabled','');
+				btn.addClass('btn-progress')
+			},
+			success: function(response){
+				btn.removeAttr('disabled');
+				btn.removeClass('btn-progress');
+				$('#enquiryform').trigger('reset');
+				$('.figure-madol').hide();
+				Sweet('success',response);
+			},
+			error: function(xhr, status, error) {
+				console.log(error);
+				btn.removeAttr('disabled');
+				btn.removeClass('btn-progress');
+				$.each(xhr.responseJSON.errors, function (key, item) {
+					Sweet('error',item)
+				});
+				//重置验证码
+				$('#captcha').click();
+			}
+		})
+	});
+})(jQuery);
