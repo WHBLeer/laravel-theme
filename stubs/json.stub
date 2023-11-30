@@ -2,12 +2,17 @@
     "name": "$STUDLY_NAME$",
     "alias": "$LOWER_NAME$",
     "description": "",
-    "logo": "",
+    "logo": "logo.png",
     "version": "1.0.0",
-    "keywords": [],
+    "keywords": ["UhaveShop主题","$STUDLY_NAME$"],
+    "author": {
+        "name": "your name",
+        "email": "your email",
+        "home": "https://www.your_home.com"
+    },
     "priority": 0,
     "providers": [
-        "$THEME_NAMESPACE$\\$STUDLY_NAME$\\$PROVIDER_NAMESPACE$\\$STUDLY_NAME$ServiceProvider"
+        "$PLUGIN_NAMESPACE$\\$STUDLY_NAME$\\$PROVIDER_NAMESPACE$\\$STUDLY_NAME$ServiceProvider"
     ],
     "aliases": {},
     "files": [],

@@ -24,12 +24,12 @@ class ThemeDeleteCommand extends Command
                 $this->getTheme()->getAllComposerRequires()
             )->run();
 
-	        // 删除插件创建的资源软链
+	        // 删除主题创建的资源软链
 	        $linkPath = public_path('assets/theme/'.$this->getTheme()->getLowerName());
 	        if (file_exists($linkPath) || is_link($linkPath)) {
 		        $this->laravel->make('files')->delete($linkPath);
 	        }
-	        // 删除插件注册
+	        // 删除主题注册
 	        $this->laravel['themes.repository']->delete($this->argument('theme'));
 
 	        $this->info("Theme {$this->argument('theme')} has been deleted.");

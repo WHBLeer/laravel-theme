@@ -2,6 +2,7 @@
 
 namespace $NAMESPACE$;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class $CLASS$ extends ServiceProvider
@@ -9,7 +10,7 @@ class $CLASS$ extends ServiceProvider
     /**
      * @var string $themeName
      */
-    protected string $themeName = '$THEME$';
+    protected string $themeName = '$PLUGIN$';
 
     /**
      * @var string $themeNameLower
@@ -26,6 +27,9 @@ class $CLASS$ extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+	    $this->registerLink();
+	    $this->registerHelper();
+	    $this->registerBlade();
     }
 
     /**
@@ -78,14 +82,56 @@ class $CLASS$ extends ServiceProvider
      */
     public function registerTranslations()
     {
-        $langPath = resource_path('lang/themes/' . $this->themeNameLower);
-
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, $this->themeNameLower);
-        } else {
-            $this->loadTranslationsFrom(theme_path($this->themeName, '$PATH_LANG$'), $this->themeNameLower);
-        }
+        $jsonLang = theme_path($this->themeName, 'Resources/lang');
+		$this->loadJsonTranslationsFrom($jsonLang);
     }
+
+	/**
+	 * Register link.
+	 *
+     * @return void
+	 */
+	public function registerLink()
+	{
+		$linkPath = public_path('assets/theme/' . $this->themeNameLower);
+
+		$targetPath = theme_path($this->themeName, '$PATH_ASSETS$');
+
+		if (!file_exists($linkPath) || !is_link($linkPath)) {
+			if (is_link($linkPath)) {
+				$this->app->make('files')->delete($linkPath);
+			}
+			$this->app->make('files')->link($targetPath, $linkPath);
+		}
+	}
+
+	/**
+	 * Register helper.
+	 *
+     * @return void
+	 */
+	public function registerHelper()
+	{
+		$helperPath = theme_path($this->themeName, '$PATH_SUPPORT$/helper.php');
+
+		if (file_exists($helperPath)) {
+			require_once $helperPath;
+		}
+	}
+
+	/**
+	 * Register blade.
+	 *
+     * @return void
+	 */
+	public function registerBlade()
+	{
+		Blade::directive('$LOWER_NAME$', function ($expression) {
+			// return 'Theme [$PLUGIN$] has been loaded';
+			// 可以在此处编辑主题标签
+			return url('/$LOWER_NAME$');
+		});
+	}
 
     /**
      * Get the services provided by the provider.
@@ -107,4 +153,5 @@ class $CLASS$ extends ServiceProvider
         }
         return $paths;
     }
+
 }

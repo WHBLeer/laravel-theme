@@ -1,9 +1,9 @@
-# Laravel Theme
+# Laravel Theme 
 
 ### [主题开发文档:https://doc.uhaveshop.vip/theme](https://doc.uhaveshop.vip/theme)
 
 ## 关于
-Laravel Theme是一个即插即用的主题共享方案，为需要建立自己的生态系统的开发人员，有了它，你可以建立一个类似wordpress的生态系统。它可以帮助您如下:
+Laravel Theme是一个主题机制解决方案，为需要建立自己的生态系统的开发人员，有了它，你可以建立一个类似wordpress的生态系统。它可以帮助您如下:
 
 * 加载主题基于服务注册。
 * 通过命令行，主题开发人员可以轻松快速地构建主题并将主题上传到主题市场。

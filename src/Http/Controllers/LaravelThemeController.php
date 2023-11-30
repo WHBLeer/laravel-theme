@@ -30,7 +30,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:list
 	 * Show list of all themes.
-	 * 显示所有插件的列表。
+	 * 显示所有主题的列表。
 	 *
 	 * @author: hongbinwang
 	 * @time  : 2023/10/18 15:23
@@ -100,7 +100,7 @@ class LaravelThemeController extends Controller
 	}
 
 	/**
-	 * 插件市场列表。
+	 * 主题市场列表。
 	 *
 	 * @param Request $request
 	 *
@@ -142,7 +142,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:disable
 	 * Disable the specified theme.
-	 * 禁用指定的插件。
+	 * 禁用指定的主题。
 	 *
 	 * @param Request $request
 	 *
@@ -167,7 +167,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:enable
 	 * Enable the specified theme.
-	 * 启用指定的插件。
+	 * 启用指定的主题。
 	 *
 	 * @param Request $request
 	 *
@@ -192,7 +192,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:delete
 	 * Delete a theme from the application
-	 * 从应用程序中删除插件
+	 * 从应用程序中删除主题
 	 *
 	 * @param Request $request
 	 *
@@ -220,7 +220,7 @@ class LaravelThemeController extends Controller
 	}
 
 	/**
-	 * 批量处理插件
+	 * 批量处理主题
 	 *
 	 * @param Request $request
 	 *
@@ -251,7 +251,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:install
 	 * Install the theme through the file directory.
-	 * 通过文件目录安装插件。
+	 * 通过文件目录安装主题。
 	 *
 	 * @param Request $request
 	 *
@@ -281,7 +281,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:publish
 	 * Publish a theme's assets to the application
-	 * 将插件的资产发布到应用程序中
+	 * 将主题的资产发布到应用程序中
 	 *
 	 * @param Request $request
 	 *
@@ -303,7 +303,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:register
 	 * register to the theme server.
-	 * 注册到插件市场。
+	 * 注册到主题市场。
 	 *
 	 * @param Request $request
 	 *
@@ -340,7 +340,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:login
 	 * Login to the theme server.
-	 * 登录到插件市场。
+	 * 登录到主题市场。
 	 *
 	 * @param Request $request
 	 *
@@ -367,7 +367,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:upload
 	 * Upload the theme to the server.
-	 * 将插件上传到插件市场。
+	 * 将主题上传到主题市场。
 	 *
 	 * @param Request $request
 	 *
@@ -421,7 +421,7 @@ class LaravelThemeController extends Controller
 
 	/**
 	 * Download theme from server to local.
-	 * 从插件市场获取插件版本。
+	 * 从主题市场获取主题版本。
 	 *
 	 * @param Request $request
 	 *
@@ -484,7 +484,7 @@ class LaravelThemeController extends Controller
 	/**
 	 * artisan theme:download
 	 * Download theme from server to local.
-	 * 从插件市场下载插件到本地。
+	 * 从主题市场下载主题到本地。
 	 *
 	 * @param Request $request
 	 *
