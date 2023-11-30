@@ -12,7 +12,7 @@
     },
     "priority": 0,
     "providers": [
-        "$PLUGIN_NAMESPACE$\\$STUDLY_NAME$\\$PROVIDER_NAMESPACE$\\$STUDLY_NAME$ServiceProvider"
+        "$THEME_NAMESPACE$\\$STUDLY_NAME$\\$PROVIDER_NAMESPACE$\\$STUDLY_NAME$ServiceProvider"
     ],
     "aliases": {},
     "files": [],

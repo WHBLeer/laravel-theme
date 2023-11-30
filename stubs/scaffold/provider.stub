@@ -10,7 +10,7 @@ class $CLASS$ extends ServiceProvider
     /**
      * @var string $themeName
      */
-    protected string $themeName = '$PLUGIN$';
+    protected string $themeName = '$THEME$';
 
     /**
      * @var string $themeNameLower
@@ -127,7 +127,7 @@ class $CLASS$ extends ServiceProvider
 	public function registerBlade()
 	{
 		Blade::directive('$LOWER_NAME$', function ($expression) {
-			// return 'Theme [$PLUGIN$] has been loaded';
+			// return 'Theme [$THEME$] has been loaded';
 			// 可以在此处编辑主题标签
 			return url('/$LOWER_NAME$');
 		});
