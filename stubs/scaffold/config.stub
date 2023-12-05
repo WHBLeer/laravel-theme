@@ -2,4 +2,20 @@
 
 return [
     'name' => '$STUDLY_NAME$',
+    /*
+	|--------------------------------------------------------------------------
+	| 主题注册菜单
+	|--------------------------------------------------------------------------
+	|
+	| status：status=true时才注册菜单
+	| file：文件格式类型参考`app/Console/Commands/Init/data/menu.json`
+	| menu.json内，如果菜单的根节点已在系统内存在，则在该根节点内插入节点
+	| menu.json内，如果菜单的根节点在系统内不存在，则在`SYSTEM`节点前插入节点
+	|
+	*/
+	'menu' => [
+		'status' => true,
+		'file' =>  'menu.json',
+		'source_by' =>  'theme_$LOWER_NAME$',
+	],
 ];
