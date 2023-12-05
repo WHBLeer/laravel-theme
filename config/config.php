@@ -97,6 +97,7 @@ return [
 
 		// 默认应用创建目录结构
 		'generator' => [
+			'config'     => ['path' => 'Config', 'generate' => true],
 			'seeder'     => ['path' => 'Database/Seeders', 'generate' => true],
 			'migration'  => ['path' => 'Database/Migrations', 'generate' => true],
 			'events'     => ['path' => 'Events', 'generate' => true],

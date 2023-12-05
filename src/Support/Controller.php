@@ -6,7 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Gloudemans\Shoppingcart\Facades\Cart;
-use App\Models\Customer\CustomerProductWishlist;
+use Plugins\UCenter\Models\CustomerProductWishlist;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
