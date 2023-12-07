@@ -147,6 +147,24 @@ class ThemeServiceProvider extends ServiceProvider
 			return $theme && $theme->isEnabled();
 		});
 
+		Blade::directive('image', function ($expression) {
+			return "<?php 
+if (is_array($expression)) {
+	\$__image = $expression;
+	\$_src = \$__image['src'];
+	\$_alt = \$__image['alt'];
+	\$_id = \$__image['id'];
+	\$_class = \$__image['class'];
+} else {
+	\$__image = \\App\\Models\\Media::find($expression);
+	\$_src = \$__image->url;
+	\$_alt = \$__image->org_name;
+	\$_id = 'img-'.\$__image->id;
+	\$_class = 'img-'.\$__image->id;
+}
+?>
+<img src=\"<?php echo e(\$_src); ?>\" alt=\"<?php echo e(\$_alt); ?>\" class=\"<?php echo e(\$_class); ?>\" id=\"<?php echo e(\$_id); ?>\" >";
+		});
 	}
 
     /**
