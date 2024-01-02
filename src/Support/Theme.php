@@ -3,7 +3,6 @@
 namespace Sanlilin\LaravelTheme\Support;
 
 use Illuminate\Cache\CacheManager;
-use phpDocumentor\Reflection\Types\Mixed;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\AliasLoader;
@@ -262,7 +261,7 @@ class Theme
 	 * Get config contents from the cache, setting as needed.
 	 *
 	 * @param  string|null  $file
-	 * @return Mixed
+	 * @return \mixed
 	 */
 	public function config(?string $file = null)
 	{
@@ -314,7 +313,7 @@ class Theme
 	 *
 	 * @param  string  $key
 	 * @param  null  $default
-	 * @return mixed
+	 * @return \mixed
 	 */
 	public function get(string $key, $default = null)
 	{

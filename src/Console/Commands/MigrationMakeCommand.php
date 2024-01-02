@@ -67,7 +67,7 @@ class MigrationMakeCommand extends GeneratorCommand
     }
 
     /**
-     * @return mixed
+     * @return \mixed
      *
      * @throws InvalidArgumentException
      */

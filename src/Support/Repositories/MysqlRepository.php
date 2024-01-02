@@ -41,7 +41,7 @@ class MysqlRepository
     }
 
     /**
-     * @param  mixed  ...$args
+     * @param \mixed  ...$args
      * @return Theme
      */
     protected function createTheme(...$args): Theme
@@ -60,7 +60,7 @@ class MysqlRepository
     /**
      * Get all themes.
      *
-     * @return mixed
+     * @return \mixed
      */
     public function all(): Collection
     {
@@ -126,7 +126,7 @@ class MysqlRepository
     /**
      * Get list of disabled themes.
      *
-     * @return mixed
+     * @return \mixed
      */
     public function allDisabled()
     {
@@ -146,7 +146,7 @@ class MysqlRepository
      * Get all ordered themes.
      *
      * @param  string  $direction
-     * @return mixed
+     * @return \mixed
      */
     public function getOrdered($direction = 'asc')
     {
@@ -226,7 +226,7 @@ class MysqlRepository
      *
      * @param  string  $key
      * @param  string|null  $default
-     * @return mixed
+     * @return \mixed
      */
     public function config(string $key, $default = null)
     {

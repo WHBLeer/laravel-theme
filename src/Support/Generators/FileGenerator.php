@@ -60,7 +60,7 @@ class FileGenerator implements GeneratorInterface
     /**
      * Set contents.
      *
-     * @param  mixed  $contents
+     * @param \mixed  $contents
      * @return $this
      */
     public function setContents(string $contents): FileGenerator

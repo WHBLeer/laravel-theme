@@ -197,7 +197,7 @@ class FileActivator implements ActivatorInterface
      *
      * @param  string  $key
      * @param  $default
-     * @return mixed
+     * @return \mixed
      */
     private function config(string $key, $default = null)
     {

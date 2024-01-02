@@ -87,7 +87,7 @@ class FileRepository implements RepositoryInterface
     }
 
     /**
-     * @param  mixed  ...$args
+     * @param \mixed  ...$args
      * @return Theme
      */
     protected function createTheme(...$args): Theme

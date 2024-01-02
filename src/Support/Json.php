@@ -38,7 +38,7 @@ class Json
     /**
      * The constructor.
      *
-     * @param  mixed  $path
+     * @param \mixed  $path
      * @param  Filesystem|null  $filesystem
      *
      * @throws Exception
@@ -86,7 +86,7 @@ class Json
     /**
      * Set path.
      *
-     * @param  mixed  $path
+     * @param \mixed  $path
      * @return $this
      */
     public function setPath(string $path): Json
@@ -187,7 +187,7 @@ class Json
      * Set a specific key & value.
      *
      * @param  string  $key
-     * @param  mixed  $value
+     * @param \mixed  $value
      * @return $this
      */
     public function set(string $key, $value): Json
@@ -211,7 +211,7 @@ class Json
      * Handle magic method __get.
      *
      * @param  string  $key
-     * @return mixed
+     * @return \mixed
      */
     public function __get($key)
     {
@@ -223,7 +223,7 @@ class Json
      *
      * @param $key
      * @param  null  $default
-     * @return mixed
+     * @return \mixed
      */
     public function get(string $key, $default = null)
     {
@@ -235,7 +235,7 @@ class Json
      *
      * @param  string  $method
      * @param  array  $arguments
-     * @return mixed
+     * @return \mixed
      */
     public function __call(string $method, array $arguments = [])
     {

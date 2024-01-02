@@ -99,7 +99,7 @@ trait HasGuzzleClient
      * @param  string  $method
      * @param  array  $options
      * @param  int  $tries
-     * @return mixed
+     * @return \mixed
      *
      * @throws GuzzleException
      */

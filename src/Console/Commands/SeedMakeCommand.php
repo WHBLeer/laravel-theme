@@ -76,7 +76,7 @@ class SeedMakeCommand extends GeneratorCommand
     }
 
     /**
-     * @return mixed
+     * @return \mixed
      */
     protected function getDestinationFilePath(): string
     {

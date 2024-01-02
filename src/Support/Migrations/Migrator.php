@@ -245,7 +245,7 @@ class Migrator
      * Save new migration to database.
      *
      * @param  string  $migration
-     * @return mixed
+     * @return \mixed
      */
     public function log($migration)
     {
