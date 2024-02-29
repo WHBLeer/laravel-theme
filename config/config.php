@@ -12,6 +12,7 @@ return [
 		'default' => \Sanlilin\LaravelTheme\Support\Client\Market::class,
 	],
 
+	'menusshow' => false,
 	'stubs' => [
 		'enabled' => false,
 		'files'   => [

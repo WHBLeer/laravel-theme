@@ -37,7 +37,10 @@ class ThemeServiceProvider extends ServiceProvider
         $this->setupStubPath();
         $this->registerProviders();
 		$this->registerBlade();
-	    $this->app->register(RouteServiceProvider::class);
+	    $menusshow = $this->app['config']->get('theme.menusshow');
+	    if($menusshow){
+		    $this->app->register(MenuServiceProvider::class);
+	    }
 	    
     }
 
