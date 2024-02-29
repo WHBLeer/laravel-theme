@@ -37,7 +37,7 @@ class ThemeServiceProvider extends ServiceProvider
         $this->setupStubPath();
         $this->registerProviders();
 		$this->registerBlade();
-	    $menusshow = $this->app['config']->get('theme.menusshow');
+	    $menusshow = $this->app['config']->get('themes.menusshow');
 	    if($menusshow){
 		    $this->app->register(MenuServiceProvider::class);
 	    }
@@ -67,7 +67,7 @@ class ThemeServiceProvider extends ServiceProvider
      */
     public function setupStubPath(): void
     {
-        $path = $this->app['config']->get('theme.stubs.path') ?? __DIR__.'/../../stubs';
+        $path = $this->app['config']->get('themes.stubs.path') ?? __DIR__.'/../../stubs';
         Stub::setBasePath($path);
 
         $this->app->booted(function ($app) {
