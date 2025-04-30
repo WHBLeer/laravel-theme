@@ -1,4 +1,4 @@
-@extends(front_view('layouts.app'),['header'=>$info->title,'breadcrumbs'=>[['url'=>null,'title'=>$info->title]]])
+@extends(front_view('layouts.app'))
 @section('content')
 <section class="product-list">
 	<div class="container">

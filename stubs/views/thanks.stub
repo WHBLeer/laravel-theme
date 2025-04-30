@@ -1,4 +1,4 @@
-@extends(front_view('layouts.app'),['header'=>__('Order Confirmation'),'breadcrumbs'=>[['url'=>null,'title'=>__('Thank you')]]])
+@extends(front_view('layouts.app'))
 @push('css')
 <link rel="stylesheet" type="text/css" href="{{ front_asset('css/thanks.css') }}" />
 @endpush

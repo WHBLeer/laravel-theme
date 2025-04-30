@@ -27,7 +27,6 @@ return [
 			'views/page'            => 'Resources/views/page.blade.php',
 			'views/thanks'          => 'Resources/views/thanks.blade.php',
 			'views/shop'            => 'Resources/views/shop.blade.php',
-			'views/marketing'       => 'Resources/views/marketing.blade.php',
 			'views/checkout'        => 'Resources/views/checkout.blade.php',
 			'views/details'         => 'Resources/views/details.blade.php',
 			'views/layouts/auth'    => 'Resources/views/layouts/auth.blade.php',
